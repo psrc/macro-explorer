@@ -1,0 +1,660 @@
+---
+title: "2026 Regional Forecast"
+subtitle: "Population & Employment Outlook"
+author: "PSRC"
+date: last-modified
+format:
+  revealjs:
+    embed-resources: true
+    theme: simple
+    slide-number: true
+    show-slide-number: print
+    transition: slide
+    chalkboard: false
+execute:
+  echo: false
+  warning: false
+---
+
+## Data Preparation {visibility="hidden"}
+
+```{python}
+#| output: false
+import os
+import re
+
+import pandas as pd
+import yaml
+
+cfg = yaml.safe_load(open("configs/settings.yaml"))
+```
+
+```{python}
+#| output: false
+data_dir = cfg["data_dir"]
+county_map = cfg["county_map"]  # "King County" -> id
+bare_county_map = {name.replace(" County", ""): name for name in county_map}  # "King" -> "King County"
+
+# OFM sheet name -> component label; column headers span an April-to-April
+# period (e.g. "1960-1961") and some Jurisdiction values carry footnote marks,
+# so counties are matched on the plain "County" column instead.
+OFM_SHEETS = {
+    "Residual Net Migration": "Migration",
+    "Natural Change": "Natural Increase",
+}
+
+
+def load_ofm_components(file_path):
+    """Read the OFM components-of-change workbook's Natural Change and Residual
+    Net Migration sheets by county into a long [region, component, year, value]
+    frame, attributing each April-to-April period to its ending year to match
+    the population estimate it feeds into."""
+    frames = []
+    for sheet_name, component in OFM_SHEETS.items():
+        df = pd.read_excel(file_path, sheet_name=sheet_name, skiprows=3)
+        df["region"] = df["County"].map(bare_county_map)
+        df = df.loc[df["region"].notna()].copy()
+
+        year_cols = [c for c in df.columns if re.search(r"\d{4}-\d{4}", str(c))]
+        long = df.melt(id_vars="region", value_vars=year_cols, var_name="period", value_name="value")
+        long["year"] = long["period"].str.extract(r"\d{4}-(\d{4})").astype(int)
+        long["component"] = component
+        frames.append(long[["region", "component", "year", "value"]])
+    return pd.concat(frames, ignore_index=True)
+```
+
+```{python}
+#| output: false
+ofm_components = load_ofm_components(os.path.join(data_dir, cfg["ofm_components_file"]))
+
+# "Region" is the sum of the four counties, computed here rather than relying on a workbook total row.
+ofm_region_totals = ofm_components.groupby(["component", "year"], as_index=False)["value"].sum()
+ofm_region_totals["region"] = "Region"
+ofm_components = pd.concat([ofm_components, ofm_region_totals], ignore_index=True)
+```
+
+```{python}
+#| output: false
+components_by_year = (
+    ofm_components.loc[ofm_components["region"] == "Region"]
+    .pivot(index="year", columns="component", values="value")
+    .sort_index()
+)
+```
+
+```{python}
+#| output: false
+components_dir = cfg["remi_components_dir"]
+
+COMPONENT_LABELS = {
+    "Total Migrants - All Races": "Migration",
+    "Natural Growth - All Races": "Natural Increase",
+}
+
+
+def load_remi_components(file_path):
+    """Read a REMI components workbook's Migration and Natural Increase rows
+    by county (in thousands) into a long [region, component, year, value] frame."""
+    df = pd.read_excel(file_path, sheet_name="All", header=5)
+    df = df.rename(columns={df.columns[0]: "region", df.columns[1]: "category"})
+    year_cols = list(df.columns[3:])
+
+    comp = df[df["region"].isin(county_map) & df["category"].isin(COMPONENT_LABELS)].copy()
+    comp["component"] = comp["category"].map(COMPONENT_LABELS)
+
+    long = comp.melt(
+        id_vars=["region", "component"],
+        value_vars=year_cols,
+        var_name="year",
+        value_name="value",
+    )
+    long["year"] = long["year"].astype(int)
+    long["value"] = long["value"].astype(float) * 1000
+    return long
+```
+
+```{python}
+#| output: false
+remi_frames = []
+for forecast in cfg["remi_components_forecasts"]:
+    file_path = os.path.join(components_dir, forecast["filename"])
+    df = load_remi_components(file_path)
+    df["name"] = forecast["name"]
+    remi_frames.append(df)
+remi_components = pd.concat(remi_frames, ignore_index=True)
+
+# "Region" is the sum of the four counties, computed here rather than relying on a workbook total row.
+remi_region_totals = remi_components.groupby(["name", "component", "year"], as_index=False)["value"].sum()
+remi_region_totals["region"] = "Region"
+remi_components = pd.concat([remi_components, remi_region_totals], ignore_index=True)
+```
+
+```{python}
+#| output: false
+remi_components_by_year = (
+    remi_components.loc[remi_components["region"] == "Region"]
+    .pivot_table(index="year", columns=["name", "component"], values="value")
+    .sort_index()
+)
+```
+
+```{python}
+#| output: false
+output_dir = cfg["output_dir"]
+
+# OFM data before 1990 is excluded; REMI and OFM become separate columns so overlapping years show both.
+history_min_year = 1990
+ofm_hist = ofm_components.loc[ofm_components["year"] >= history_min_year].rename(columns={"value": "OFM"})
+history_max_year = int(ofm_hist["year"].max())
+remi_wide = remi_components.drop(columns="name").rename(columns={"value": "REMI"})
+
+comp_all = pd.merge(ofm_hist, remi_wide, on=["region", "component", "year"], how="outer").sort_values(
+    ["region", "component", "year"]
+)
+
+comp_all.to_csv(os.path.join(output_dir, "components_history_forecast.csv"), index=False)
+```
+
+```{python}
+#| output: false
+def load_ofm_population(file_path):
+    """Read the OFM Population sheet's April 1 estimates by county into a long
+    [region, year, value] frame; column headers end in a year, some with footnote marks."""
+    df = pd.read_excel(file_path, sheet_name="Population", skiprows=3)
+    df["region"] = df["County"].map(bare_county_map)
+    df = df.loc[df["region"].notna()].copy()
+
+    year_cols = [c for c in df.columns if re.search(r"\d{4}", str(c))]
+    long = df.melt(id_vars="region", value_vars=year_cols, var_name="period", value_name="value")
+    long["year"] = long["period"].str.extract(r"(\d{4})").astype(int)
+    return long[["region", "year", "value"]]
+
+
+ofm_population = load_ofm_population(os.path.join(data_dir, cfg["ofm_components_file"]))
+
+# "Region" is the sum of the four counties, computed here rather than relying on a workbook total row.
+ofm_population_region_totals = ofm_population.groupby("year", as_index=False)["value"].sum()
+ofm_population_region_totals["region"] = "Region"
+ofm_population = pd.concat([ofm_population, ofm_population_region_totals], ignore_index=True)
+
+POPULATION_LABELS = {"Total Population": "Population"}
+
+
+def load_remi_population(file_path):
+    """Read a REMI components workbook's Total Population row by county (in
+    thousands) into a long [region, year, value] frame."""
+    df = pd.read_excel(file_path, sheet_name="All", header=5)
+    df = df.rename(columns={df.columns[0]: "region", df.columns[1]: "category"})
+    year_cols = list(df.columns[3:])
+
+    pop = df[df["region"].isin(county_map) & df["category"].isin(POPULATION_LABELS)].copy()
+    long = pop.melt(id_vars="region", value_vars=year_cols, var_name="year", value_name="value")
+    long["year"] = long["year"].astype(int)
+    long["value"] = long["value"].astype(float) * 1000
+    return long[["region", "year", "value"]]
+
+
+remi_population_frames = []
+for forecast in cfg["remi_components_forecasts"]:
+    file_path = os.path.join(components_dir, forecast["filename"])
+    df = load_remi_population(file_path)
+    df["name"] = forecast["name"]
+    remi_population_frames.append(df)
+remi_population = pd.concat(remi_population_frames, ignore_index=True)
+
+remi_population_region_totals = remi_population.groupby(["name", "year"], as_index=False)["value"].sum()
+remi_population_region_totals["region"] = "Region"
+remi_population = pd.concat([remi_population, remi_population_region_totals], ignore_index=True)
+```
+
+```{python}
+#| output: false
+EMPLOYMENT_PREFIX = "Employment - "
+
+
+def load_remi_employment(file_path):
+    """Read a REMI workbook's industry-level Employment rows (excludes the
+    separate Employment by Occupation breakdown) and sum them by county (in
+    thousands) into a long [region, year, value] frame."""
+    df = pd.read_excel(file_path, sheet_name="All", header=5)
+    df = df.rename(columns={df.columns[0]: "region", df.columns[1]: "category"})
+    year_cols = list(df.columns[3:])
+
+    emp = df[df["region"].isin(county_map) & df["category"].str.startswith(EMPLOYMENT_PREFIX)].copy()
+    long = emp.melt(id_vars="region", value_vars=year_cols, var_name="year", value_name="value")
+    long["year"] = long["year"].astype(int)
+    long["value"] = long["value"].astype(float) * 1000
+    return long.groupby(["region", "year"], as_index=False)["value"].sum()
+
+
+remi_dir = cfg["remi_dir"]
+
+remi_employment_frames = []
+for forecast in cfg["remi_forecasts"]:
+    file_path = os.path.join(remi_dir, forecast["filename"])
+    df = load_remi_employment(file_path)
+    df["name"] = forecast["name"]
+    remi_employment_frames.append(df)
+remi_employment = pd.concat(remi_employment_frames, ignore_index=True)
+
+# "Region" is the sum of the four counties, computed here rather than relying on a workbook total row.
+remi_employment_region_totals = remi_employment.groupby(["name", "year"], as_index=False)["value"].sum()
+remi_employment_region_totals["region"] = "Region"
+remi_employment = pd.concat([remi_employment, remi_employment_region_totals], ignore_index=True)
+
+# Year-over-year change per region, needed for the average annual employment growth table below.
+remi_employment = remi_employment.sort_values(["region", "year"])
+remi_employment["growth"] = remi_employment.groupby("region")["value"].diff()
+```
+
+```{python}
+#| output: false
+def load_remi_national_employment(file_path):
+    """Read a REMI national workbook's industry-level Employment rows (excludes
+    the separate Employment by Occupation breakdown) summed into a long
+    [region, year, value] frame for the Nation."""
+    df = pd.read_excel(file_path, sheet_name="All", header=5)
+    df = df.rename(columns={df.columns[0]: "region", df.columns[1]: "category"})
+    year_cols = list(df.columns[3:])
+
+    emp = df[(df["region"] == "Nation") & df["category"].str.startswith(EMPLOYMENT_PREFIX)].copy()
+    long = emp.melt(id_vars="region", value_vars=year_cols, var_name="year", value_name="value")
+    long["year"] = long["year"].astype(int)
+    long["value"] = long["value"].astype(float) * 1000
+    return long.groupby(["region", "year"], as_index=False)["value"].sum()
+
+
+national_file_path = os.path.join(remi_dir, cfg["remi_national_forecasts"])
+remi_national_employment = load_remi_national_employment(national_file_path).sort_values("year")
+remi_national_employment["growth"] = remi_national_employment["value"].diff()
+```
+
+```{python}
+#| output: false
+def cagr(df, region, start, end):
+    subset = df.loc[(df["region"] == region) & (df["year"] >= start) & (df["year"] <= end)].sort_values("year")
+    start_value, end_value = subset["value"].iloc[0], subset["value"].iloc[-1]
+    n_years = subset["year"].iloc[-1] - subset["year"].iloc[0]
+    return (end_value / start_value) ** (1 / n_years) - 1
+```
+
+```{python}
+#| output: false
+def load_remi_industry(file_path, category, regions):
+    """Read a single Employment industry category from a REMI workbook into a
+    long [region, year, value] frame."""
+    df = pd.read_excel(file_path, sheet_name="All", header=5)
+    df = df.rename(columns={df.columns[0]: "region", df.columns[1]: "category"})
+    year_cols = list(df.columns[3:])
+
+    ind = df[df["region"].isin(regions) & (df["category"] == category)].copy()
+    long = ind.melt(id_vars="region", value_vars=year_cols, var_name="year", value_name="value")
+    long["year"] = long["year"].astype(int)
+    long["value"] = long["value"].astype(float) * 1000
+    return long[["region", "year", "value"]]
+
+
+def industry_cagr_table(category):
+    """Build a PSRC Region vs. Nation CAGR table (same periods as cagr_table) for one REMI industry category."""
+    regional_frames = []
+    for forecast in cfg["remi_forecasts"]:
+        file_path = os.path.join(remi_dir, forecast["filename"])
+        regional_frames.append(load_remi_industry(file_path, category, county_map))
+    regional = pd.concat(regional_frames, ignore_index=True)
+    region_totals = regional.groupby("year", as_index=False)["value"].sum()
+    region_totals["region"] = "Region"
+    regional = pd.concat([regional, region_totals], ignore_index=True)
+
+    national = load_remi_industry(national_file_path, category, ["Nation"])
+
+    table = pd.DataFrame(
+        {
+            "PSRC Region": {label: cagr(regional, "Region", start, end) for label, start, end in job_periods},
+            "Nation": {label: cagr(national, "Nation", start, end) for label, start, end in job_periods},
+        }
+    )
+    return table.rename_axis(index="Period", columns=None)
+```
+
+```{python}
+#| output: false
+def load_ofm_forecast_population(file_path):
+    """Read the OFM GMA growth-management forecast's Population sheet, keeping
+    the age="Total" row per county, into a long [region, year, value] frame.
+    Data points are unevenly spaced (2020, 2022, then every 5 years); the
+    first "Projection"-labeled year marks the start of the forecast."""
+    raw = pd.read_excel(file_path, sheet_name="Population", header=None)
+    labels, years = raw.iloc[0], raw.iloc[1]
+    year_cols = {int(year): idx for idx, year in years.items() if pd.notna(year)}
+    forecast_start_year = int(years[labels == "Projection"].iloc[0])
+
+    df = raw.iloc[3:].copy()
+    df["region"] = df[0].map(bare_county_map)
+    df = df.loc[df["region"].notna() & (df[1] == "Total")]
+
+    records = []
+    for year, col_idx in year_cols.items():
+        total_col = col_idx + 2
+        sub = df[["region", total_col]].rename(columns={total_col: "value"})
+        sub["year"] = year
+        records.append(sub)
+    long = pd.concat(records, ignore_index=True)
+    long["value"] = long["value"].astype(float)
+    return long[["region", "year", "value"]], forecast_start_year
+
+
+ofm_forecast_population, ofm_forecast_start_year = load_ofm_forecast_population(
+    os.path.join(data_dir, cfg["ofm_forecast_file"])
+)
+
+# "Region" is the sum of the four counties, computed here rather than relying on a workbook total row.
+ofm_forecast_population_region_totals = ofm_forecast_population.groupby("year", as_index=False)["value"].sum()
+ofm_forecast_population_region_totals["region"] = "Region"
+ofm_forecast_population = pd.concat(
+    [ofm_forecast_population, ofm_forecast_population_region_totals], ignore_index=True
+)
+```
+
+```{python}
+#| output: false
+woods_poole_dir = cfg["woods_poole_forecast_dir"]
+county_id_map = {v: k for k, v in county_map.items()}  # id -> "King County"
+
+
+def load_woods_poole_population(dir_path, files):
+    """Read each Woods & Poole county CSV's Total Population row (in
+    thousands) into a long [region, year, value] frame."""
+    frames = []
+    for entry in files:
+        (county_id, filename), = entry.items()
+        raw = pd.read_csv(os.path.join(dir_path, filename), skiprows=2, index_col=0)
+        pop = raw.loc["TOTAL POPULATION (in thousands)"].rename("value").reset_index()
+        pop = pop.rename(columns={"index": "year"})
+        pop["year"] = pop["year"].astype(int)
+        pop["value"] = pop["value"].astype(float) * 1000
+        pop["region"] = county_id_map[county_id]
+        frames.append(pop)
+    return pd.concat(frames, ignore_index=True)
+
+
+woods_poole_population = load_woods_poole_population(woods_poole_dir, cfg["woods_poole_files"])
+
+# "Region" is the sum of the four counties, computed here rather than relying on a workbook total row.
+woods_poole_region_totals = woods_poole_population.groupby("year", as_index=False)["value"].sum()
+woods_poole_region_totals["region"] = "Region"
+woods_poole_population = pd.concat([woods_poole_population, woods_poole_region_totals], ignore_index=True)
+```
+
+```{python}
+#| output: false
+def load_luvit_population(file_path):
+    """Read the LUVit CSV's Region-level Total Population row (in thousands,
+    already summed across counties) into a long [region, year, value] frame."""
+    df = pd.read_csv(file_path)
+    pop = df.loc[
+        (df["Main Measure"] == "Population")
+        & (df["Detailed Measure"] == "Total Population")
+        & (df["Region"] == "Region")
+    ]
+    year_cols = [c for c in df.columns if re.fullmatch(r"\d{4}", str(c))]
+    long = pop.melt(value_vars=year_cols, var_name="year", value_name="value")
+    long["year"] = long["year"].astype(int)
+    long["value"] = long["value"].astype(float) * 1000
+    long["region"] = "Region"
+    return long[["region", "year", "value"]]
+
+
+luvit_population = load_luvit_population(os.path.join(data_dir, cfg["luvit_forecast_file"]))
+```
+
+## Regional Population Forecast
+
+```{python}
+import plotly.express as px
+
+remi_forecast_population = remi_population.loc[
+    (remi_population["region"] == "Region") & (remi_population["year"] >= 2026)
+].sort_values("year")
+remi_forecast_population["value"] = (remi_forecast_population["value"] / 1_000_000).round(2)
+
+fig = px.bar(remi_forecast_population, x="year", y="value", title="REMI Population Forecast")
+fig.update_layout(xaxis_title="Year", yaxis_title="Total Population (Millions)")
+fig.update_traces(hovertemplate="Year=%{x}<br>Total Population=%{y:.2f}M<extra></extra>")
+
+# Callouts for the first and last forecast years.
+for _, row in remi_forecast_population.iloc[[0, -1]].iterrows():
+    fig.add_annotation(
+        x=row["year"],
+        y=row["value"],
+        text=f"{row['value']:.2f}M",
+        showarrow=False,
+        yshift=12,
+    )
+
+fig.show()
+```
+
+## Regional Population Forecast — Takeaways
+
+- The region grows from **4.56M** residents in 2026 to **6.14M** by 2060 — a gain of roughly **1.58M** people.
+- That's about **0.88%** average annual growth compounded over the 34-year forecast horizon.
+- The pace is consistent with the long-run historical average (see the growth-by-period comparison next).
+
+## Regional Employment Forecast
+
+```{python}
+remi_forecast_employment = remi_employment.loc[
+    (remi_employment["region"] == "Region") & (remi_employment["year"] >= cfg['remi_base_year'])
+].sort_values("year")
+remi_forecast_employment["value"] = (remi_forecast_employment["value"] / 1_000_000).round(2)
+
+fig = px.bar(remi_forecast_employment, x="year", y="value", title="REMI Employment Forecast")
+fig.update_layout(xaxis_title="Year", yaxis_title="Total Employment (Millions)")
+fig.update_traces(marker_color="#00cc96", hovertemplate="Year=%{x}<br>Total Employment=%{y:.2f}M<extra></extra>")
+
+# Callouts for the first and last forecast years.
+for _, row in remi_forecast_employment.iloc[[0, -1]].iterrows():
+    fig.add_annotation(
+        x=row["year"],
+        y=row["value"],
+        text=f"{row['value']:.2f}M",
+        showarrow=False,
+        yshift=12,
+    )
+
+fig.show()
+```
+
+## Regional Employment Forecast — Takeaways
+
+- Regional employment grows from **2.93M** jobs in 2024 to **4.04M** by 2060 — an increase of roughly **1.11M** jobs.
+- That's about **0.89%** average annual growth, a moderate but sustained pace over the full forecast.
+- Growth continues, but at a slower rate than the boom years of the 2010s (see the job growth comparison next).
+
+## Population Growth by Period {.smaller}
+
+```{python}
+remi_base_year = cfg["remi_base_year"]
+
+periods = [
+    ("1990s", 1990, 1999),
+    ("2000s", 2000, 2009),
+    ("2010s", 2010, 2019),
+    (f"2020-{history_max_year}", 2020, history_max_year),
+    (f"REMI {remi_base_year + 1}-2060", remi_base_year + 1, 2060),
+]
+
+def period_avg(df, start, end):
+    subset = df.loc[(df["region"] == "Region") & (df["year"] >= start) & (df["year"] <= end)]
+    return subset.groupby("component")["value"].mean()
+
+# Historical periods use OFM only, the forecast period uses REMI only.
+ofm_periods, remi_period = periods[:4], periods[4]
+ofm_avg_table = pd.concat(
+    [period_avg(ofm_components, start, end).rename(label) for label, start, end in ofm_periods], axis=1
+).T
+remi_label, remi_start, remi_end = remi_period
+remi_avg_table = period_avg(remi_components, remi_start, remi_end).rename(remi_label).to_frame().T
+
+
+ofm_pop_region = ofm_population.loc[ofm_population["region"] == "Region"].sort_values("year").set_index("year")["value"]
+ofm_growth = ofm_pop_region.diff()
+
+remi_pop_region = remi_population.loc[remi_population["region"] == "Region"].sort_values("year").set_index("year")["value"]
+remi_growth = remi_pop_region.diff()
+
+
+def growth_period_avg(growth, start, end):
+    return growth.loc[(growth.index >= start) & (growth.index <= end)].mean()
+
+
+# Historical periods use OFM only, the forecast period uses REMI only, same split as decade_avg_table.
+ofm_growth_avg = pd.Series(
+    {label: growth_period_avg(ofm_growth, start, end) for label, start, end in ofm_periods}, name="Avg. Annual Pop Growth"
+)
+remi_growth_avg = pd.Series({remi_label: growth_period_avg(remi_growth, remi_start, remi_end)}, name="Avg. Annual Pop Growth")
+
+growth_avg_table = pd.concat([ofm_growth_avg, remi_growth_avg]).to_frame().round(0).astype(int)
+growth_avg_table = growth_avg_table.rename_axis(index="Period", columns=None)
+growth_avg_table.style.format({
+    'Avg. Annual Pop Growth': '{:,.0f}'
+})
+```
+
+## Population Growth by Period — Takeaways
+
+- Historically, growth has been remarkably steady: ranging from **44,341**/year to **55,711**/year.
+- The REMI forecast projects **47,714**/year, just below the recent 2020-2026 pace of **48,978**/year.
+- No period shows a dramatic acceleration or slowdown — the long-run growth trend persists into the forecast.
+
+## Migration vs. Natural Increase {.smaller}
+
+```{python}
+decade_avg_table = pd.concat([ofm_avg_table, remi_avg_table]).round(0).astype(int)
+decade_avg_table = decade_avg_table.rename_axis(index="Period", columns=None)
+decade_avg_table.style.format({
+    'Migration': '{:,.0f}',
+    'Natural Increase': '{:,.0f}'
+})
+```
+
+## Migration vs. Natural Increase — Takeaways
+
+- Migration has held steady to increasing — **32,325**/year in the 1990s to **37,572**/year in the REMI forecast.
+- Natural Increase has declined sharply — from **23,211**/year in the 1990s to just **10,142**/year in the REMI forecast, less than half.
+- Migration is projected to become the dominant driver of growth as the population ages and fertility rates decline.
+
+## Employment Growth by Period {.smaller}
+
+```{python}
+job_periods = [
+    ("2000s", 2000, 2009),
+    ("2010s", 2010, 2019),
+    ("2020-2024", 2020, 2024),
+    ("REMI 2025-2060", 2025, 2060),
+]
+
+def job_growth_period_avg(df, start, end):
+    subset = df.loc[(df["region"] == "Region") & (df["year"] >= start) & (df["year"] <= end)]
+    return subset["growth"].mean()
+
+job_growth_avg_table = pd.Series(
+    {label: job_growth_period_avg(remi_employment, start, end) for label, start, end in job_periods},
+    name="Avg. Annual Employment Growth",
+).round(0).astype(int).to_frame()
+job_growth_avg_table = job_growth_avg_table.rename_axis(index="Period", columns=None)
+job_growth_avg_table.style.format({"Avg. Annual Employment Growth": "{:,.0f}"})
+```
+
+## Employment Growth by Period — Takeaways
+
+- Job growth surged in the 2010s (**51,904**/year).
+- Growth dipped to **21,585**/year in 2020-2024, reflecting the pandemic-era disruption.
+- The REMI forecast averages **30,784**/year — a moderate, sustained pace below the 2010s boom but well above 2000s levels.
+
+## Employment Growth vs. the Nation {.smaller}
+
+```{python}
+cagr_table = pd.DataFrame(
+    {
+        "PSRC Region": {label: cagr(remi_employment, "Region", start, end) for label, start, end in job_periods},
+        "Nation": {label: cagr(remi_national_employment, "Nation", start, end) for label, start, end in job_periods},
+    }
+)
+cagr_table = cagr_table.rename_axis(index="Period", columns=None)
+cagr_table.style.format("{:.2%}")
+```
+
+## Employment Growth vs. the Nation — Takeaways
+
+- The region outpaced the nation in 3 of 4 periods: **0.86%** vs. **0.60%** (2000s), **2.43%** vs. **1.72%** (2010s), and **0.87%** vs. **0.35%** (2025-2060 forecast).
+- The exception was 2020-2024, where the nation's post-pandemic snapback (**2.81%**) outpaced the region (**1.98%**).
+- Long-run, the region is forecast to grow jobs roughly **2.5x** faster than the nation.
+
+## Information Sector vs. the Nation {.smaller}
+
+```{python}
+information_cagr_table = industry_cagr_table("Employment - Information")
+information_cagr_table.style.format("{:.2%}")
+```
+
+## Information Sector vs. the Nation — Takeaways
+
+- The region's Information sector grew a strong **4.17%** annually in the 2010s tech boom, versus just **0.56%** nationally.
+- The nation's Information sector actually shrank in the 2000s (**-2.48%**) while the region still grew modestly (**1.10%**).
+- Forecast growth moderates to **0.79%**/year regionally — still roughly double the national **0.44%** pace.
+
+## Professional & Technical Services vs. the Nation {.smaller}
+
+```{python}
+professional_scientific_cagr_table = industry_cagr_table("Employment - Professional, scientific, and technical services")
+professional_scientific_cagr_table.style.format("{:.2%}")
+```
+
+## Professional & Technical Services vs. the Nation — Takeaways
+
+- Regional Professional, Scientific, and Technical services grew steadily across every period: **1.91%**, **2.68%**, **3.20%**, and **1.31%**.
+- The region matched or exceeded the national pace in all four periods.
+- Forecast 2025-2060 growth of **1.31%**/year is over **1.5x** the national **0.84%** pace — continued regional outperformance in this sector.
+
+## Comparing Population Forecasts {.smaller}
+
+```{python}
+def avg_annual_change(df, region, start_year):
+    """Average annual change in value for a region from the first year at or
+    after start_year through the series' last year, using only the endpoints
+    (handles unevenly-spaced data such as the OFM GMA forecast)."""
+    subset = df.loc[(df["region"] == region) & (df["year"] >= start_year)].sort_values("year")
+    start_value, end_value = subset["value"].iloc[0], subset["value"].iloc[-1]
+    n_years = subset["year"].iloc[-1] - subset["year"].iloc[0]
+    return (end_value - start_value) / n_years
+
+
+forecast_comparison_table = pd.Series(
+    {
+        "LUV-it (2018)": avg_annual_change(luvit_population, "Region", cfg["luvit_forecast_start_year"]),
+        "OFM GMA (2022)": avg_annual_change(ofm_forecast_population, "Region", ofm_forecast_start_year),
+        "REMI (2026)": avg_annual_change(remi_population, "Region", cfg["remi_base_year"] + 1),
+        "Woods & Poole (2026)": avg_annual_change(
+            woods_poole_population, "Region", cfg["woods_poole_forecast_start_year"]
+        ),
+        
+    },
+    name="Avg. Annual Population Growth",
+).round(0).astype(int).to_frame()
+forecast_comparison_table = forecast_comparison_table.rename_axis(index="Forecast", columns=None)
+forecast_comparison_table.style.format({"Avg. Annual Population Growth": "{:,.0f}"})
+```
+
+## Comparing Population Forecasts — Takeaways
+
+- The 3 more recent forecasts broadly agree, ranging from **40,165** to **46,009** additional residents per year.
+- The REMI forecast projects **46,009**/year — the highest of the recent forecasts.
+
+## Summary
+
+- Region population: **4.56M → 6.14M** by 2060 (~0.88%/year).
+- Region employment: **2.93M → 4.04M** by 2060 (~0.89%/year).
+- Migration is overtaking natural increase as the primary source of population growth.
+- The region is forecast to keep outpacing the nation in job growth, led by Information and Professional/Technical services.
+- Recent population forecasts agree within a **40,000-46,000** person/year range.

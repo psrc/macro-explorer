@@ -1,0 +1,39 @@
+data_dir: data
+output_dir: output
+county_ids: [53033, 53035, 53053, 53061]
+county_map:
+  King County: 53033
+  Kitsap County: 53035
+  Pierce County: 53053
+  Snohomish County: 53061
+state_id: 53
+
+ofm_components_file: ofm_april1_components_of_change_1960_to_present.xlsx
+
+remi_base_year: 2024
+remi_components_dir: J:/Projects/Forecasts/_Regional/2026/REMI/Components
+remi_components_forecasts:
+  - name: REMI
+    filename: REMI_v3.4_base_adj_to_OFM.xlsx
+  # - name: REMI_national
+  #   filename: REMI_v3.4_national.xlsx
+
+remi_dir: J:/Projects/Forecasts/_Regional/2026/REMI
+remi_forecasts:
+  - name: REMI
+    filename: REMI_v3.4_base_adj_to_OFM.xlsx
+remi_national_forecasts: REMI_v3.4_national.xlsx
+
+luvit_forecast_file: luvit.csv
+luvit_forecast_start_year: 2018
+
+ofm_forecast_file: gma_2022_age_sex_med.xlsx
+
+woods_poole_forecast_dir: J:/Projects/Forecasts/_Regional/2026/WoodsPoole
+woods_poole_files:
+  - 53033: King2026.csv
+  - 53035: Kitsap2026.csv
+  - 53053: Pierce2026.csv
+  - 53061: Snohomish2026.csv
+woods_poole_forecast_start_year: 2026
+

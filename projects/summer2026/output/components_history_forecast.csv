@@ -1,0 +1,711 @@
+region,component,year,OFM,REMI
+King County,Migration,1990,31955.0,
+King County,Migration,1991,30203.0,
+King County,Migration,1992,8492.0,
+King County,Migration,1993,8088.0,
+King County,Migration,1994,7875.0,
+King County,Migration,1995,4995.0,
+King County,Migration,1996,4693.0,
+King County,Migration,1997,9131.0,
+King County,Migration,1998,16567.0,
+King County,Migration,1999,15253.0,
+King County,Migration,2000,14718.0,
+King County,Migration,2001,7632.0,5742.00737476349
+King County,Migration,2002,11740.0,-4857.885658741
+King County,Migration,2003,53.0,-4938.14250826836
+King County,Migration,2004,1825.0,1441.18496775627
+King County,Migration,2005,2700.0,9380.99920749664
+King County,Migration,2006,18657.0,16309.9787384272
+King County,Migration,2007,12904.0,12693.995721638199
+King County,Migration,2008,6936.0,14650.9843766689
+King County,Migration,2009,4619.0,23260.9975337982
+King County,Migration,2010,8468.0,12275.9883105755
+King County,Migration,2011,1961.0,23656.0168266296
+King County,Migration,2012,-1604.0,24555.0501346588
+King County,Migration,2013,14135.0,23448.9254951477
+King County,Migration,2014,24793.0,25274.9781608582
+King County,Migration,2015,28376.0,28744.221329689
+King County,Migration,2016,44038.0,27391.6892111301
+King County,Migration,2017,18694.0,24520.8293199539
+King County,Migration,2018,25411.0,11815.1090145111
+King County,Migration,2019,29249.0,10297.010421752899
+King County,Migration,2020,31376.0,15053.9489090443
+King County,Migration,2021,8744.0,-28690.2062669396
+King County,Migration,2022,22424.0,11560.037910938301
+King County,Migration,2023,22923.0,18282.2587490082
+King County,Migration,2024,22971.0,35932.0459365845
+King County,Migration,2025,25676.0,63490.0318247932
+King County,Migration,2026,4836.0,5173.06179314081
+King County,Migration,2027,,-3725.07030145075
+King County,Migration,2028,,-1070.55839898086
+King County,Migration,2029,,2990.4592681821696
+King County,Migration,2030,,9779.497315473729
+King County,Migration,2031,,13935.3791981126
+King County,Migration,2032,,16794.4166826857
+King County,Migration,2033,,19362.535061888502
+King County,Migration,2034,,23829.455789426
+King County,Migration,2035,,23575.5072285742
+King County,Migration,2036,,24735.6568409882
+King County,Migration,2037,,23949.9187165513
+King County,Migration,2038,,22350.696314717
+King County,Migration,2039,,20512.899418620902
+King County,Migration,2040,,18982.1210211019
+King County,Migration,2041,,18183.0395398078
+King County,Migration,2042,,17895.3639608279
+King County,Migration,2043,,17927.573929316502
+King County,Migration,2044,,18513.8320183051
+King County,Migration,2045,,19301.338008056402
+King County,Migration,2046,,20399.0738630353
+King County,Migration,2047,,21681.999913598
+King County,Migration,2048,,23109.1371240092
+King County,Migration,2049,,24605.8796801162
+King County,Migration,2050,,26142.0684816359
+King County,Migration,2051,,27727.6458679086
+King County,Migration,2052,,29218.8751970921
+King County,Migration,2053,,30820.5339500855
+King County,Migration,2054,,32421.347395234698
+King County,Migration,2055,,33805.0926169374
+King County,Migration,2056,,34976.0610392655
+King County,Migration,2057,,35853.9398052822
+King County,Migration,2058,,36568.8386496195
+King County,Migration,2059,,37081.5351199544
+King County,Migration,2060,,37423.9164553856
+King County,Natural Increase,1990,12049.0,
+King County,Natural Increase,1991,12483.0,
+King County,Natural Increase,1992,12514.0,
+King County,Natural Increase,1993,11518.0,
+King County,Natural Increase,1994,11051.0,
+King County,Natural Increase,1995,10717.0,
+King County,Natural Increase,1996,10315.0,
+King County,Natural Increase,1997,9726.0,
+King County,Natural Increase,1998,10593.0,
+King County,Natural Increase,1999,10603.0,
+King County,Natural Increase,2000,10206.0,
+King County,Natural Increase,2001,10809.0,10523.5756635666
+King County,Natural Increase,2002,10287.0,10334.8205089569
+King County,Natural Increase,2003,10515.0,10460.1838588715
+King County,Natural Increase,2004,10876.0,11126.4454126358
+King County,Natural Increase,2005,11516.0,11257.279753685
+King County,Natural Increase,2006,11553.0,12039.9898290634
+King County,Natural Increase,2007,12985.0,13185.2419376373
+King County,Natural Increase,2008,13091.0,13040.164232254
+King County,Natural Increase,2009,13461.0,13605.101346969599
+King County,Natural Increase,2010,13576.0,13159.8007678986
+King County,Natural Increase,2011,12476.0,12361.0745668411
+King County,Natural Increase,2012,12673.0,12513.5172605515
+King County,Natural Increase,2013,12660.0,12671.016454696699
+King County,Natural Increase,2014,12684.0,12915.137887001
+King County,Natural Increase,2015,12578.0,12421.373963356
+King County,Natural Increase,2016,12939.0,13039.0682220459
+King County,Natural Increase,2017,12258.0,12592.747986316701
+King County,Natural Increase,2018,12139.0,11729.6230792999
+King County,Natural Increase,2019,11046.0,10845.9758758545
+King County,Natural Increase,2020,10544.0,9487.73485422134
+King County,Natural Increase,2021,8631.0,8468.10925006866
+King County,Natural Increase,2022,8226.0,8169.79140043259
+King County,Natural Increase,2023,7177.0,7505.52219152451
+King County,Natural Increase,2024,7329.0,7411.68123483658
+King County,Natural Increase,2025,7924.0,7994.51024933266
+King County,Natural Increase,2026,8164.0,7831.65985617312
+King County,Natural Increase,2027,,7414.0071147299095
+King County,Natural Increase,2028,,6956.054503296459
+King County,Natural Increase,2029,,6491.282696045259
+King County,Natural Increase,2030,,6073.85518290961
+King County,Natural Increase,2031,,5687.26580489997
+King County,Natural Increase,2032,,5317.9113377897
+King County,Natural Increase,2033,,4988.17132942391
+King County,Natural Increase,2034,,4735.06790666089
+King County,Natural Increase,2035,,4507.28566425535
+King County,Natural Increase,2036,,4357.09104794533
+King County,Natural Increase,2037,,4269.178153400931
+King County,Natural Increase,2038,,4237.28401763342
+King County,Natural Increase,2039,,4259.76678124247
+King County,Natural Increase,2040,,4334.44068150815
+King County,Natural Increase,2041,,4430.78838628439
+King County,Natural Increase,2042,,4574.607688719149
+King County,Natural Increase,2043,,4731.46259930181
+King County,Natural Increase,2044,,4912.14481878629
+King County,Natural Increase,2045,,5109.77916693
+King County,Natural Increase,2046,,5312.022224880469
+King County,Natural Increase,2047,,5545.03704215137
+King County,Natural Increase,2048,,5750.94645458781
+King County,Natural Increase,2049,,5992.2887984955005
+King County,Natural Increase,2050,,6228.00657838067
+King County,Natural Increase,2051,,6464.440982994321
+King County,Natural Increase,2052,,6730.16664971997
+King County,Natural Increase,2053,,6985.51898791059
+King County,Natural Increase,2054,,7249.65300421729
+King County,Natural Increase,2055,,7533.86034759428
+King County,Natural Increase,2056,,7829.83829819222
+King County,Natural Increase,2057,,8118.971723504959
+King County,Natural Increase,2058,,8411.01086470322
+King County,Natural Increase,2059,,8691.27878860178
+King County,Natural Increase,2060,,8959.83575264465
+Kitsap County,Migration,1990,4716.0,
+Kitsap County,Migration,1991,5103.0,
+Kitsap County,Migration,1992,3073.0,
+Kitsap County,Migration,1993,3725.0,
+Kitsap County,Migration,1994,2650.0,
+Kitsap County,Migration,1995,3945.0,
+Kitsap County,Migration,1996,1760.0,
+Kitsap County,Migration,1997,1713.0,
+Kitsap County,Migration,1998,298.0,
+Kitsap County,Migration,1999,1106.0,
+Kitsap County,Migration,2000,1058.0,
+Kitsap County,Migration,2001,674.0,-202.999313361943
+Kitsap County,Migration,2002,1614.0,1611.01157101803
+Kitsap County,Migration,2003,1563.0,-466.99671447277103
+Kitsap County,Migration,2004,228.0,145.001590251923
+Kitsap County,Migration,2005,-2174.0,-4123.98652266711
+Kitsap County,Migration,2006,3014.0,2987.00129985809
+Kitsap County,Migration,2007,2208.0,-2912.99537569284
+Kitsap County,Migration,2008,1463.0,910.999670624733
+Kitsap County,Migration,2009,157.0,-126.998782157898
+Kitsap County,Migration,2010,-1021.0,1152.99043059349
+Kitsap County,Migration,2011,-1700.0,1723.00419025123
+Kitsap County,Migration,2012,1455.0,-1047.99385368824
+Kitsap County,Migration,2013,-683.0,-2800.01110583544
+Kitsap County,Migration,2014,1925.0,235.020101070404
+Kitsap County,Migration,2015,2213.0,4952.03378796577
+Kitsap County,Migration,2016,3514.0,3020.98681032658
+Kitsap County,Migration,2017,927.0,2377.03152000904
+Kitsap County,Migration,2018,3228.0,2235.98937690258
+Kitsap County,Migration,2019,2302.0,2003.99116426706
+Kitsap County,Migration,2020,2667.0,127.003159373999
+Kitsap County,Migration,2021,1803.0,397.994812577963
+Kitsap County,Migration,2022,3135.0,1242.99468100071
+Kitsap County,Migration,2023,1925.0,-532.995387911797
+Kitsap County,Migration,2024,2770.0,3192.01461225748
+Kitsap County,Migration,2025,2668.0,6891.51356167659
+Kitsap County,Migration,2026,2534.0,2324.39826899535
+Kitsap County,Migration,2027,,2855.7187407309802
+Kitsap County,Migration,2028,,1771.6239697287199
+Kitsap County,Migration,2029,,1549.7241977046601
+Kitsap County,Migration,2030,,1149.3252056552901
+Kitsap County,Migration,2031,,993.513313113226
+Kitsap County,Migration,2032,,989.600707689225
+Kitsap County,Migration,2033,,938.696574287206
+Kitsap County,Migration,2034,,921.493986828823
+Kitsap County,Migration,2035,,897.1073735370489
+Kitsap County,Migration,2036,,926.887556409184
+Kitsap County,Migration,2037,,881.23112497494
+Kitsap County,Migration,2038,,832.861132070336
+Kitsap County,Migration,2039,,791.384388320743
+Kitsap County,Migration,2040,,761.4146333025819
+Kitsap County,Migration,2041,,716.965828329416
+Kitsap County,Migration,2042,,670.899850481675
+Kitsap County,Migration,2043,,626.1527567030149
+Kitsap County,Migration,2044,,610.6390950649651
+Kitsap County,Migration,2045,,582.5096168985971
+Kitsap County,Migration,2046,,569.3752701521399
+Kitsap County,Migration,2047,,565.0815856121179
+Kitsap County,Migration,2048,,562.281940340801
+Kitsap County,Migration,2049,,571.751765918289
+Kitsap County,Migration,2050,,600.927523374473
+Kitsap County,Migration,2051,,652.014372225556
+Kitsap County,Migration,2052,,681.685901866741
+Kitsap County,Migration,2053,,720.455690640401
+Kitsap County,Migration,2054,,748.225704528204
+Kitsap County,Migration,2055,,776.879282082328
+Kitsap County,Migration,2056,,799.746066321499
+Kitsap County,Migration,2057,,789.287452437746
+Kitsap County,Migration,2058,,799.2568899835691
+Kitsap County,Migration,2059,,801.623374717237
+Kitsap County,Migration,2060,,780.9617492159781
+Kitsap County,Natural Increase,1990,1865.0,
+Kitsap County,Natural Increase,1991,2092.0,
+Kitsap County,Natural Increase,1992,2114.0,
+Kitsap County,Natural Increase,1993,2138.0,
+Kitsap County,Natural Increase,1994,1803.0,
+Kitsap County,Natural Increase,1995,1934.0,
+Kitsap County,Natural Increase,1996,1781.0,
+Kitsap County,Natural Increase,1997,1689.0,
+Kitsap County,Natural Increase,1998,1630.0,
+Kitsap County,Natural Increase,1999,1284.0,
+Kitsap County,Natural Increase,2000,1342.0,
+Kitsap County,Natural Increase,2001,1275.0,1186.96526437998
+Kitsap County,Natural Increase,2002,1124.0,1159.80349481106
+Kitsap County,Natural Increase,2003,1224.0,1271.7184573411898
+Kitsap County,Natural Increase,2004,1106.0,1147.76170253754
+Kitsap County,Natural Increase,2005,1216.0,1124.7201189398802
+Kitsap County,Natural Increase,2006,1216.0,1292.8760945797
+Kitsap County,Natural Increase,2007,1219.0,1179.77120354772
+Kitsap County,Natural Increase,2008,966.0,1008.6896382272199
+Kitsap County,Natural Increase,2009,1187.0,1095.3286066651299
+Kitsap County,Natural Increase,2010,905.0,1017.1825252473401
+Kitsap County,Natural Increase,2011,989.0,927.906915545464
+Kitsap County,Natural Increase,2012,1030.0,1108.8149845600099
+Kitsap County,Natural Increase,2013,993.0,861.636076122522
+Kitsap County,Natural Increase,2014,829.0,848.69434684515
+Kitsap County,Natural Increase,2015,850.0,885.820776224136
+Kitsap County,Natural Increase,2016,923.0,924.778893589974
+Kitsap County,Natural Increase,2017,870.0,834.753353148699
+Kitsap County,Natural Increase,2018,784.0,702.615860849619
+Kitsap County,Natural Increase,2019,760.0,704.3115124106411
+Kitsap County,Natural Increase,2020,602.0,353.848107159138
+Kitsap County,Natural Increase,2021,286.0,269.882746040821
+Kitsap County,Natural Increase,2022,65.0,119.99373883009
+Kitsap County,Natural Increase,2023,375.0,367.932088673115
+Kitsap County,Natural Increase,2024,130.0,569.454584270716
+Kitsap County,Natural Increase,2025,132.0,588.2969074988271
+Kitsap County,Natural Increase,2026,366.0,575.8215593945421
+Kitsap County,Natural Increase,2027,,556.082045490494
+Kitsap County,Natural Increase,2028,,530.406454968687
+Kitsap County,Natural Increase,2029,,487.15798287973
+Kitsap County,Natural Increase,2030,,444.646991297289
+Kitsap County,Natural Increase,2031,,395.564172734917
+Kitsap County,Natural Increase,2032,,348.46346123797
+Kitsap County,Natural Increase,2033,,303.337674333072
+Kitsap County,Natural Increase,2034,,263.62172057011
+Kitsap County,Natural Increase,2035,,225.700056808879
+Kitsap County,Natural Increase,2036,,192.192280250733
+Kitsap County,Natural Increase,2037,,164.775080251816
+Kitsap County,Natural Increase,2038,,137.139200156751
+Kitsap County,Natural Increase,2039,,117.60116915514101
+Kitsap County,Natural Increase,2040,,104.565895050639
+Kitsap County,Natural Increase,2041,,95.0270548756222
+Kitsap County,Natural Increase,2042,,93.09957175813629
+Kitsap County,Natural Increase,2043,,99.8501074725788
+Kitsap County,Natural Increase,2044,,115.360668873083
+Kitsap County,Natural Increase,2045,,137.496493128109
+Kitsap County,Natural Increase,2046,,170.630128881457
+Kitsap County,Natural Increase,2047,,214.92136946259998
+Kitsap County,Natural Increase,2048,,258.72273083173195
+Kitsap County,Natural Increase,2049,,315.255914528672
+Kitsap County,Natural Increase,2050,,376.076108833954
+Kitsap County,Natural Increase,2051,,442.990559901657
+Kitsap County,Natural Increase,2052,,513.315905466719
+Kitsap County,Natural Increase,2053,,585.546420566232
+Kitsap County,Natural Increase,2054,,661.7750776674301
+Kitsap County,Natural Increase,2055,,742.119524406501
+Kitsap County,Natural Increase,2056,,824.250193140363
+Kitsap County,Natural Increase,2057,,904.709020984809
+Kitsap County,Natural Increase,2058,,985.736882014978
+Kitsap County,Natural Increase,2059,,1063.3695670965699
+Kitsap County,Natural Increase,2060,,1135.02794786757
+Pierce County,Migration,1990,6735.0,
+Pierce County,Migration,1991,5640.0,
+Pierce County,Migration,1992,6362.0,
+Pierce County,Migration,1993,7289.0,
+Pierce County,Migration,1994,7685.0,
+Pierce County,Migration,1995,7497.0,
+Pierce County,Migration,1996,-606.0,
+Pierce County,Migration,1997,6132.0,
+Pierce County,Migration,1998,6648.0,
+Pierce County,Migration,1999,8379.0,
+Pierce County,Migration,2000,7086.0,
+Pierce County,Migration,2001,3535.0,8026.00386738777
+Pierce County,Migration,2002,7190.0,7469.99096870422
+Pierce County,Migration,2003,6208.0,1737.9927560687102
+Pierce County,Migration,2004,7053.0,1712.00026571751
+Pierce County,Migration,2005,8341.0,3808.98505449295
+Pierce County,Migration,2006,11956.0,10134.9965929985
+Pierce County,Migration,2007,7068.0,3904.99539673328
+Pierce County,Migration,2008,1790.0,7592.99999475479
+Pierce County,Migration,2009,-3280.0,4754.9047172069495
+Pierce County,Migration,2010,-7420.0,-8504.88565862179
+Pierce County,Migration,2011,6020.0,7212.00394630432
+Pierce County,Migration,2012,2175.0,2520.9549665451
+Pierce County,Migration,2013,3660.0,539.043851196766
+Pierce County,Migration,2014,6146.0,6316.01059436798
+Pierce County,Migration,2015,5465.0,6104.95018959045
+Pierce County,Migration,2016,12151.0,14267.0177221298
+Pierce County,Migration,2017,10430.0,12109.0226173401
+Pierce County,Migration,2018,9233.0,9647.99082279205
+Pierce County,Migration,2019,9842.0,6599.03907775879
+Pierce County,Migration,2020,10403.0,4633.9618563652
+Pierce County,Migration,2021,4405.0,24.9953866004944
+Pierce County,Migration,2022,6740.0,-2288.97857666016
+Pierce County,Migration,2023,6106.0,1967.02516078949
+Pierce County,Migration,2024,3866.0,6213.99438381195
+Pierce County,Migration,2025,4770.0,15508.4840437286
+Pierce County,Migration,2026,4612.0,4017.30632535304
+Pierce County,Migration,2027,,3047.46066737277
+Pierce County,Migration,2028,,1138.10278168834
+Pierce County,Migration,2029,,1669.35126536253
+Pierce County,Migration,2030,,1866.68835904994
+Pierce County,Migration,2031,,2539.86164739506
+Pierce County,Migration,2032,,3278.44022719087
+Pierce County,Migration,2033,,3866.17716083274
+Pierce County,Migration,2034,,4943.55155457714
+Pierce County,Migration,2035,,5096.6923516007
+Pierce County,Migration,2036,,5439.93635021916
+Pierce County,Migration,2037,,5370.02095400259
+Pierce County,Migration,2038,,5224.08935481792
+Pierce County,Migration,2039,,5022.07831321523
+Pierce County,Migration,2040,,4802.589093000331
+Pierce County,Migration,2041,,4544.55267515789
+Pierce County,Migration,2042,,4422.90208522014
+Pierce County,Migration,2043,,4333.485952709731
+Pierce County,Migration,2044,,4359.96293637434
+Pierce County,Migration,2045,,4388.26626975749
+Pierce County,Migration,2046,,4497.94927095366
+Pierce County,Migration,2047,,4629.99509791271
+Pierce County,Migration,2048,,4844.1148705279
+Pierce County,Migration,2049,,5062.2206905922
+Pierce County,Migration,2050,,5279.98360891881
+Pierce County,Migration,2051,,5492.36653288419
+Pierce County,Migration,2052,,5702.80900923857
+Pierce County,Migration,2053,,5946.77825618389
+Pierce County,Migration,2054,,6125.645276402431
+Pierce County,Migration,2055,,6245.37532195603
+Pierce County,Migration,2056,,6290.269706965641
+Pierce County,Migration,2057,,6247.19146220931
+Pierce County,Migration,2058,,6139.13180574759
+Pierce County,Migration,2059,,6008.4372526835505
+Pierce County,Migration,2060,,5807.16691750338
+Pierce County,Natural Increase,1990,5896.0,
+Pierce County,Natural Increase,1991,6222.0,
+Pierce County,Natural Increase,1992,6192.0,
+Pierce County,Natural Increase,1993,5789.0,
+Pierce County,Natural Increase,1994,5420.0,
+Pierce County,Natural Increase,1995,4985.0,
+Pierce County,Natural Increase,1996,4534.0,
+Pierce County,Natural Increase,1997,4726.0,
+Pierce County,Natural Increase,1998,4933.0,
+Pierce County,Natural Increase,1999,4854.0,
+Pierce County,Natural Increase,2000,4848.0,
+Pierce County,Natural Increase,2001,4935.0,4854.97462749481
+Pierce County,Natural Increase,2002,4646.0,4644.81949806213
+Pierce County,Natural Increase,2003,4637.0,4558.73411893845
+Pierce County,Natural Increase,2004,4679.0,4828.66847515106
+Pierce County,Natural Increase,2005,4877.0,4703.58264446259
+Pierce County,Natural Increase,2006,5175.0,5548.81551861763
+Pierce County,Natural Increase,2007,5793.0,5805.6735098362
+Pierce County,Natural Increase,2008,5629.0,5644.47215199471
+Pierce County,Natural Increase,2009,5850.0,6152.64970064163
+Pierce County,Natural Increase,2010,5745.0,5444.7370469570205
+Pierce County,Natural Increase,2011,4945.0,5080.7794034481
+Pierce County,Natural Increase,2012,5849.0,5720.63598036766
+Pierce County,Natural Increase,2013,5158.0,5103.22558879852
+Pierce County,Natural Increase,2014,5366.0,5484.29352045059
+Pierce County,Natural Increase,2015,5315.0,5142.61734485626
+Pierce County,Natural Increase,2016,5133.0,5357.55175352097
+Pierce County,Natural Increase,2017,4882.0,4581.54761791229
+Pierce County,Natural Increase,2018,4508.0,4514.24437761307
+Pierce County,Natural Increase,2019,4338.0,4140.272019431
+Pierce County,Natural Increase,2020,4149.0,3490.75388908386
+Pierce County,Natural Increase,2021,3402.0,3236.96410655975
+Pierce County,Natural Increase,2022,2460.0,2361.97280883789
+Pierce County,Natural Increase,2023,2794.0,2673.93857240677
+Pierce County,Natural Increase,2024,2434.0,3199.31483268738
+Pierce County,Natural Increase,2025,2530.0,3219.99110811783
+Pierce County,Natural Increase,2026,2488.0,3084.6876755447
+Pierce County,Natural Increase,2027,,2919.76386269585
+Pierce County,Natural Increase,2028,,2750.20230384917
+Pierce County,Natural Increase,2029,,2549.68006036601
+Pierce County,Natural Increase,2030,,2377.04256560175
+Pierce County,Natural Increase,2031,,2208.83188426245
+Pierce County,Natural Increase,2032,,2063.11514971426
+Pierce County,Natural Increase,2033,,1946.12688766103
+Pierce County,Natural Increase,2034,,1872.45326325985
+Pierce County,Natural Increase,2035,,1820.67569235703
+Pierce County,Natural Increase,2036,,1800.7428575361998
+Pierce County,Natural Increase,2037,,1797.03180514133
+Pierce County,Natural Increase,2038,,1809.9152050811101
+Pierce County,Natural Increase,2039,,1841.80505507411
+Pierce County,Natural Increase,2040,,1882.25502881604
+Pierce County,Natural Increase,2041,,1924.39378009765
+Pierce County,Natural Increase,2042,,1965.1009920545698
+Pierce County,Natural Increase,2043,,2003.54087753397
+Pierce County,Natural Increase,2044,,2043.0377471066001
+Pierce County,Natural Increase,2045,,2088.7854316786497
+Pierce County,Natural Increase,2046,,2138.09642282375
+Pierce County,Natural Increase,2047,,2198.03238701695
+Pierce County,Natural Increase,2048,,2248.9274458329496
+Pierce County,Natural Increase,2049,,2307.84171288186
+Pierce County,Natural Increase,2050,,2369.0453356727203
+Pierce County,Natural Increase,2051,,2439.6721303337
+Pierce County,Natural Increase,2052,,2516.2060105775004
+Pierce County,Natural Increase,2053,,2598.23935526305
+Pierce County,Natural Increase,2054,,2689.36200143668
+Pierce County,Natural Increase,2055,,2794.6125014395
+Pierce County,Natural Increase,2056,,2908.69570741157
+Pierce County,Natural Increase,2057,,3031.77621677552
+Pierce County,Natural Increase,2058,,3159.81147487997
+Pierce County,Natural Increase,2059,,3285.49959240762
+Pierce County,Natural Increase,2060,,3405.7456420271997
+Region,Migration,1990,59326.0,
+Region,Migration,1991,58065.0,
+Region,Migration,1992,20916.0,
+Region,Migration,1993,24975.0,
+Region,Migration,1994,26076.0,
+Region,Migration,1995,23621.0,
+Region,Migration,1996,12425.0,
+Region,Migration,1997,24391.0,
+Region,Migration,1998,35082.0,
+Region,Migration,1999,38370.0,
+Region,Migration,2000,34963.0,
+Region,Migration,2001,18872.0,21447.002540342506
+Region,Migration,2002,27418.0,8279.09181150608
+Region,Migration,2003,14052.0,-4669.142462313171
+Region,Migration,2004,13480.0,5877.185657620434
+Region,Migration,2005,16982.0,15273.98111391812
+Region,Migration,2006,43726.0,39458.96889269359
+Region,Migration,2007,30281.0,20846.987530589096
+Region,Migration,2008,14913.0,27406.979843974084
+Region,Migration,2009,2826.0,33315.89564681051
+Region,Migration,2010,2662.0,8364.05260860921
+Region,Migration,2011,7356.0,35007.99193792041
+Region,Migration,2012,4398.0,31933.037802576997
+Region,Migration,2013,22454.0,28739.94874954223
+Region,Migration,2014,39215.0,40557.04349279408
+Region,Migration,2015,45649.0,47771.09244465825
+Region,Migration,2016,68553.0,57744.59438025948
+Region,Migration,2017,38852.0,49837.84087002274
+Region,Migration,2018,47686.0,30504.153534769997
+Region,Migration,2019,50290.0,23123.94801527259
+Region,Migration,2020,54199.0,24247.99653515223
+Region,Migration,2021,21785.0,-25814.241927117073
+Region,Migration,2022,38455.0,13325.075343251261
+Region,Migration,2023,40197.0,25485.346749424953
+Region,Migration,2024,33268.0,55558.08571726083
+Region,Migration,2025,36305.0,91884.58928717811
+Region,Migration,2026,14649.0,13962.645588850159
+Region,Migration,2027,,6940.1769058645605
+Region,Migration,2028,,6591.64597772412
+Region,Migration,2029,,11553.09445622431
+Region,Migration,2030,,19379.38540347624
+Region,Migration,2031,,24948.792085127774
+Region,Migration,2032,,29371.095909565614
+Region,Migration,2033,,32995.23275288363
+Region,Migration,2034,,39497.815229421576
+Region,Migration,2035,,39067.72842228554
+Region,Migration,2036,,40702.753336618116
+Region,Migration,2037,,39408.65302808795
+Region,Migration,2038,,37010.47511593007
+Region,Migration,2039,,34316.42176390666
+Region,Migration,2040,,32071.68662515818
+Region,Migration,2041,,30649.767631192844
+Region,Migration,2042,,30063.078115771277
+Region,Migration,2043,,29956.42961320841
+Region,Migration,2044,,30741.012580698625
+Region,Migration,2045,,31820.59370868011
+Region,Migration,2046,,33391.814190467834
+Region,Migration,2047,,35189.6742560438
+Region,Migration,2048,,37198.94092510133
+Region,Migration,2049,,39357.81272201624
+Region,Migration,2050,,41589.47433209398
+Region,Migration,2051,,43840.86491748493
+Region,Migration,2052,,45957.23487884181
+Region,Migration,2053,,48182.451680661296
+Region,Migration,2054,,50324.200648790335
+Region,Migration,2055,,52143.87997487456
+Region,Migration,2056,,53484.41369029314
+Region,Migration,2057,,54275.050678843756
+Region,Migration,2058,,54797.76969325396
+Region,Migration,2059,,55015.67300605529
+Region,Migration,2060,,54893.79632169816
+Region,Natural Increase,1990,25058.0,
+Region,Natural Increase,1991,26125.0,
+Region,Natural Increase,1992,26217.0,
+Region,Natural Increase,1993,24447.0,
+Region,Natural Increase,1994,23032.0,
+Region,Natural Increase,1995,22196.0,
+Region,Natural Increase,1996,21086.0,
+Region,Natural Increase,1997,20573.0,
+Region,Natural Increase,1998,21898.0,
+Region,Natural Increase,1999,21479.0,
+Region,Natural Increase,2000,21053.0,
+Region,Natural Increase,2001,21828.0,21327.425338327892
+Region,Natural Increase,2002,20606.0,20601.75330936908
+Region,Natural Increase,2003,20803.0,20660.01594066624
+Region,Natural Increase,2004,21123.0,21704.27975058555
+Region,Natural Increase,2005,22062.0,21430.02330511809
+Region,Natural Increase,2006,22625.0,23762.42171227931
+Region,Natural Increase,2007,25084.0,25387.17888668177
+Region,Natural Increase,2008,24978.0,25056.5085969865
+Region,Natural Increase,2009,25732.0,26061.31578236817
+Region,Natural Increase,2010,25032.0,24397.87882193928
+Region,Natural Increase,2011,22874.0,22600.521147251104
+Region,Natural Increase,2012,23851.0,23542.56244003777
+Region,Natural Increase,2013,23212.0,23112.03733459119
+Region,Natural Increase,2014,23424.0,23623.37092310186
+Region,Natural Increase,2015,23394.0,23028.374761342988
+Region,Natural Increase,2016,23614.0,24075.882568955425
+Region,Natural Increase,2017,22406.0,22321.45433500411
+Region,Natural Increase,2018,21744.0,21163.58143463729
+Region,Natural Increase,2019,20443.0,19739.46105502547
+Region,Natural Increase,2020,19080.0,16827.99976319074
+Region,Natural Increase,2021,15329.0,15200.74436813592
+Region,Natural Increase,2022,14095.0,13773.716263473041
+Region,Natural Increase,2023,13603.0,13770.287819206726
+Region,Natural Increase,2024,13532.0,14736.470136791477
+Region,Natural Increase,2025,14095.0,15493.589441397848
+Region,Natural Increase,2026,14251.0,14946.275116775161
+Region,Natural Increase,2027,,14058.191579854574
+Region,Natural Increase,2028,,13113.482501057617
+Region,Natural Increase,2029,,12102.664091446679
+Region,Natural Increase,2030,,11182.51096857152
+Region,Natural Increase,2031,,10300.266265715698
+Region,Natural Increase,2032,,9488.355529490931
+Region,Natural Increase,2033,,8770.071814592302
+Region,Natural Increase,2034,,8215.69162549716
+Region,Natural Increase,2035,,7731.779890442509
+Region,Natural Increase,2036,,7393.335531689342
+Region,Natural Increase,2037,,7160.541048792622
+Region,Natural Increase,2038,,7017.512552307843
+Region,Natural Increase,2039,,6969.996880321392
+Region,Natural Increase,2040,,7000.541997912504
+Region,Natural Increase,2041,,7066.939141753698
+Region,Natural Increase,2042,,7200.891864087338
+Region,Natural Increase,2043,,7350.658535637951
+Region,Natural Increase,2044,,7541.964999454773
+Region,Natural Increase,2045,,7762.632839686892
+Region,Natural Increase,2046,,8021.379736270115
+Region,Natural Increase,2047,,8359.417199532916
+Region,Natural Increase,2048,,8661.227064607581
+Region,Natural Increase,2049,,9048.488875448751
+Region,Natural Increase,2050,,9446.661086027209
+Region,Natural Increase,2051,,9884.300499142453
+Region,Natural Increase,2052,,10378.83746475315
+Region,Natural Increase,2053,,10882.634450809355
+Region,Natural Increase,2054,,11421.81234175086
+Region,Natural Increase,2055,,12013.048682457289
+Region,Natural Increase,2056,,12628.416154110562
+Region,Natural Increase,2057,,13234.794921940527
+Region,Natural Increase,2058,,13847.965615670517
+Region,Natural Increase,2059,,14438.013512502659
+Region,Natural Increase,2060,,14987.77726203643
+Snohomish County,Migration,1990,15920.0,
+Snohomish County,Migration,1991,17119.0,
+Snohomish County,Migration,1992,2989.0,
+Snohomish County,Migration,1993,5873.0,
+Snohomish County,Migration,1994,7866.0,
+Snohomish County,Migration,1995,7184.0,
+Snohomish County,Migration,1996,6578.0,
+Snohomish County,Migration,1997,7415.0,
+Snohomish County,Migration,1998,11569.0,
+Snohomish County,Migration,1999,13632.0,
+Snohomish County,Migration,2000,12101.0,
+Snohomish County,Migration,2001,7031.0,7881.99061155319
+Snohomish County,Migration,2002,6874.0,4055.9749305248297
+Snohomish County,Migration,2003,6228.0,-1001.99599564075
+Snohomish County,Migration,2004,4374.0,2578.99883389473
+Snohomish County,Migration,2005,8115.0,6207.98337459564
+Snohomish County,Migration,2006,10099.0,10026.9922614098
+Snohomish County,Migration,2007,8101.0,7160.99178791046
+Snohomish County,Migration,2008,4724.0,4251.99580192566
+Snohomish County,Migration,2009,1330.0,5426.9921779632605
+Snohomish County,Migration,2010,2635.0,3439.95952606201
+Snohomish County,Migration,2011,1075.0,2416.96697473526
+Snohomish County,Migration,2012,2372.0,5905.02655506134
+Snohomish County,Migration,2013,5342.0,7551.9905090331995
+Snohomish County,Migration,2014,6351.0,8731.0346364975
+Snohomish County,Migration,2015,9595.0,7969.88713741303
+Snohomish County,Migration,2016,8850.0,13064.900636673001
+Snohomish County,Migration,2017,8801.0,10830.9574127197
+Snohomish County,Migration,2018,9814.0,6805.06432056427
+Snohomish County,Migration,2019,8897.0,4223.90735149384
+Snohomish County,Migration,2020,9753.0,4433.0826103687305
+Snohomish County,Migration,2021,6833.0,2452.97414064407
+Snohomish County,Migration,2022,6156.0,2811.02132797241
+Snohomish County,Migration,2023,9243.0,5769.05822753906
+Snohomish County,Migration,2024,3661.0,10220.030784606899
+Snohomish County,Migration,2025,3191.0,5994.55985697972
+Snohomish County,Migration,2026,2667.0,2447.87920136096
+Snohomish County,Migration,2027,,4762.06779921156
+Snohomish County,Migration,2028,,4752.47762528792
+Snohomish County,Migration,2029,,5343.55972497495
+Snohomish County,Migration,2030,,6583.87452329728
+Snohomish County,Migration,2031,,7480.0379265068905
+Snohomish County,Migration,2032,,8308.63829199982
+Snohomish County,Migration,2033,,8827.823955875188
+Snohomish County,Migration,2034,,9803.313898589611
+Snohomish County,Migration,2035,,9498.42146857359
+Snohomish County,Migration,2036,,9600.27258900157
+Snohomish County,Migration,2037,,9207.48223255912
+Snohomish County,Migration,2038,,8602.828314324819
+Snohomish County,Migration,2039,,7990.05964374979
+Snohomish County,Migration,2040,,7525.56187775337
+Snohomish County,Migration,2041,,7205.209587897741
+Snohomish County,Migration,2042,,7073.91221924156
+Snohomish County,Migration,2043,,7069.216974479161
+Snohomish County,Migration,2044,,7256.578530954221
+Snohomish County,Migration,2045,,7548.4798139676195
+Snohomish County,Migration,2046,,7925.41578632673
+Snohomish County,Migration,2047,,8312.59765892097
+Snohomish County,Migration,2048,,8683.40699022343
+Snohomish County,Migration,2049,,9117.96058538955
+Snohomish County,Migration,2050,,9566.494718164799
+Snohomish County,Migration,2051,,9968.838144466581
+Snohomish County,Migration,2052,,10353.864770644399
+Snohomish County,Migration,2053,,10694.683783751501
+Snohomish County,Migration,2054,,11028.982272625
+Snohomish County,Migration,2055,,11316.5327538988
+Snohomish County,Migration,2056,,11418.336877740501
+Snohomish County,Migration,2057,,11384.6319589145
+Snohomish County,Migration,2058,,11290.5423479033
+Snohomish County,Migration,2059,,11124.0772587001
+Snohomish County,Migration,2060,,10881.7511995932
+Snohomish County,Natural Increase,1990,5248.0,
+Snohomish County,Natural Increase,1991,5328.0,
+Snohomish County,Natural Increase,1992,5397.0,
+Snohomish County,Natural Increase,1993,5002.0,
+Snohomish County,Natural Increase,1994,4758.0,
+Snohomish County,Natural Increase,1995,4560.0,
+Snohomish County,Natural Increase,1996,4456.0,
+Snohomish County,Natural Increase,1997,4432.0,
+Snohomish County,Natural Increase,1998,4742.0,
+Snohomish County,Natural Increase,1999,4738.0,
+Snohomish County,Natural Increase,2000,4657.0,
+Snohomish County,Natural Increase,2001,4809.0,4761.9097828865
+Snohomish County,Natural Increase,2002,4549.0,4462.30980753899
+Snohomish County,Natural Increase,2003,4427.0,4369.3795055151
+Snohomish County,Natural Increase,2004,4462.0,4601.40416026115
+Snohomish County,Natural Increase,2005,4453.0,4344.44078803062
+Snohomish County,Natural Increase,2006,4681.0,4880.74027001858
+Snohomish County,Natural Increase,2007,5087.0,5216.49223566055
+Snohomish County,Natural Increase,2008,5292.0,5363.18257451057
+Snohomish County,Natural Increase,2009,5234.0,5208.23612809181
+Snohomish County,Natural Increase,2010,4806.0,4776.15848183632
+Snohomish County,Natural Increase,2011,4464.0,4230.76026141644
+Snohomish County,Natural Increase,2012,4299.0,4199.5942145586
+Snohomish County,Natural Increase,2013,4401.0,4476.15921497345
+Snohomish County,Natural Increase,2014,4545.0,4375.24516880512
+Snohomish County,Natural Increase,2015,4651.0,4578.56267690659
+Snohomish County,Natural Increase,2016,4619.0,4754.48369979858
+Snohomish County,Natural Increase,2017,4396.0,4312.40537762642
+Snohomish County,Natural Increase,2018,4313.0,4217.0981168747
+Snohomish County,Natural Increase,2019,4299.0,4048.9016473293295
+Snohomish County,Natural Increase,2020,3785.0,3495.6629127264
+Snohomish County,Natural Increase,2021,3010.0,3225.78826546669
+Snohomish County,Natural Increase,2022,3344.0,3121.95831537247
+Snohomish County,Natural Increase,2023,3257.0,3222.89496660233
+Snohomish County,Natural Increase,2024,3639.0,3556.0194849968
+Snohomish County,Natural Increase,2025,3509.0,3690.7911764485298
+Snohomish County,Natural Increase,2026,3233.0,3454.1060256627998
+Snohomish County,Natural Increase,2027,,3168.33855693832
+Snohomish County,Natural Increase,2028,,2876.8192389433
+Snohomish County,Natural Increase,2029,,2574.54335215568
+Snohomish County,Natural Increase,2030,,2286.96622876287
+Snohomish County,Natural Increase,2031,,2008.6044038183602
+Snohomish County,Natural Increase,2032,,1758.865580749
+Snohomish County,Natural Increase,2033,,1532.4359231742899
+Snohomish County,Natural Increase,2034,,1344.54873500631
+Snohomish County,Natural Increase,2035,,1178.11847702125
+Snohomish County,Natural Increase,2036,,1043.3093459570798
+Snohomish County,Natural Increase,2037,,929.556009998545
+Snohomish County,Natural Increase,2038,,833.174129436562
+Snohomish County,Natural Increase,2039,,750.8238748496719
+Snohomish County,Natural Increase,2040,,679.2803925376741
+Snohomish County,Natural Increase,2041,,616.729920496036
+Snohomish County,Natural Increase,2042,,568.0836115554821
+Snohomish County,Natural Increase,2043,,515.8049513295921
+Snohomish County,Natural Increase,2044,,471.4217646888
+Snohomish County,Natural Increase,2045,,426.571747950133
+Snohomish County,Natural Increase,2046,,400.630959684439
+Snohomish County,Natural Increase,2047,,401.426400901996
+Snohomish County,Natural Increase,2048,,402.63043335509
+Snohomish County,Natural Increase,2049,,433.102449542718
+Snohomish County,Natural Increase,2050,,473.533063139864
+Snohomish County,Natural Increase,2051,,537.196825912775
+Snohomish County,Natural Increase,2052,,619.148898988959
+Snohomish County,Natural Increase,2053,,713.3296870694829
+Snohomish County,Natural Increase,2054,,821.02225842946
+Snohomish County,Natural Increase,2055,,942.456309017008
+Snohomish County,Natural Increase,2056,,1065.63195536641
+Snohomish County,Natural Increase,2057,,1179.33796067524
+Snohomish County,Natural Increase,2058,,1291.40639407235
+Snohomish County,Natural Increase,2059,,1397.86556439669
+Snohomish County,Natural Increase,2060,,1487.16791949701

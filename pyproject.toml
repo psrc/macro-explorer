@@ -1,0 +1,24 @@
+[project]
+name = "macro-explorer"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "jkolberg", email = "jkolberg@psrc.org" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "ipykernel>=7.3.0",
+    "jinja2>=3.1.6",
+    "nbformat>=5.11.1",
+    "openpyxl>=3.1.5",
+    "pandas>=3.0.5",
+    "plotly>=7.0.0",
+    "psrcelmerpy @git+https://github.com/psrc/psrcelmerpy.git",
+    "pyaml>=26.7.0",
+    "quarto>=0.1.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.12.5,<0.13.0"]
+build-backend = "uv_build"

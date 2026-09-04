@@ -1,0 +1,297 @@
+---
+title: "Migration & Natural Growth"
+format:
+  dashboard:
+    embed-resources: true
+    theme: cosmo
+    output-file: components_dashboard.html
+    nav-buttons:
+      - icon: bar-chart-line
+        href: index.html
+        aria-label: "Forecast Explorer"
+      - icon: house
+        href: ofm_population_dashboard.html
+        aria-label: "OFM Population History"
+      - icon: briefcase
+        href: ces_employment_dashboard.html
+        aria-label: "CES Employment"
+---
+
+```{python}
+#| output: false
+import os
+import re
+
+import pandas as pd
+import yaml
+
+cfg = yaml.safe_load(open("configs/settings.yaml"))
+
+components_dir = cfg["remi_components_dir"]
+data_dir = cfg["data_dir"]
+county_map = cfg["county_map"]  # "King County" -> id
+bare_county_map = {name.replace(" County", ""): name for name in county_map}  # "King" -> "King County"
+
+COMPONENT_LABELS = {
+    "Total Migrants - All Races": "Migration",
+    "Natural Growth - All Races": "Natural Increase",
+}
+
+# OFM sheet name -> component label; column headers span an April-to-April
+# period (e.g. "1960-1961") and some Jurisdiction values carry footnote marks,
+# so counties are matched on the plain "County" column instead.
+OFM_SHEETS = {
+    "Residual Net Migration": "Migration",
+    "Natural Change": "Natural Increase",
+}
+
+
+def load_remi_components(file_path):
+    """Read a REMI components workbook's Migration and Natural Increase rows
+    by county (in thousands) into a long [region, component, year, value] frame."""
+    df = pd.read_excel(file_path, sheet_name="All", header=5)
+    df = df.rename(columns={df.columns[0]: "region", df.columns[1]: "category"})
+    year_cols = list(df.columns[3:])
+
+    comp = df[df["region"].isin(county_map) & df["category"].isin(COMPONENT_LABELS)].copy()
+    comp["component"] = comp["category"].map(COMPONENT_LABELS)
+
+    long = comp.melt(
+        id_vars=["region", "component"],
+        value_vars=year_cols,
+        var_name="year",
+        value_name="value",
+    )
+    long["year"] = long["year"].astype(int)
+    long["value"] = long["value"].astype(float) * 1000
+    return long
+
+
+def load_ofm_components(file_path):
+    """Read the OFM components-of-change workbook's Natural Change and Residual
+    Net Migration sheets by county into a long [region, component, year, value]
+    frame, attributing each April-to-April period to its ending year to match
+    the population estimate it feeds into."""
+    frames = []
+    for sheet_name, component in OFM_SHEETS.items():
+        df = pd.read_excel(file_path, sheet_name=sheet_name, skiprows=3)
+        df["region"] = df["County"].map(bare_county_map)
+        df = df.loc[df["region"].notna()].copy()
+
+        year_cols = [c for c in df.columns if re.search(r"\d{4}-\d{4}", str(c))]
+        long = df.melt(id_vars="region", value_vars=year_cols, var_name="period", value_name="value")
+        long["year"] = long["period"].str.extract(r"\d{4}-(\d{4})").astype(int)
+        long["component"] = component
+        frames.append(long[["region", "component", "year", "value"]])
+    return pd.concat(frames, ignore_index=True)
+
+
+comp_frames = []
+for comp_file in cfg["remi_components_files"]:
+    file_path = os.path.join(components_dir, comp_file["filename"])
+    df = load_remi_components(file_path)
+    df["name"] = comp_file["name"]
+    comp_frames.append(df)
+components = pd.concat(comp_frames, ignore_index=True)
+
+ofm_components = load_ofm_components(os.path.join(data_dir, cfg["ofm_components_file"]))
+
+# "Region" is the sum of the four counties, computed here rather than relying on a workbook total row.
+region_totals = components.groupby(["name", "component", "year"], as_index=False)["value"].sum()
+region_totals["region"] = "Region"
+components = pd.concat([components, region_totals], ignore_index=True)
+
+ofm_region_totals = ofm_components.groupby(["component", "year"], as_index=False)["value"].sum()
+ofm_region_totals["region"] = "Region"
+ofm_components = pd.concat([ofm_components, ofm_region_totals], ignore_index=True)
+
+scenario_names = [comp_file["name"] for comp_file in cfg["remi_components_files"]]
+
+# OFM is the historical source of truth for every year it covers (from 1990 on);
+# REMI scenario years that overlap with OFM history are dropped in favor of the OFM values.
+history_min_year = 1990
+comp_hist = ofm_components.loc[ofm_components["year"] >= history_min_year].assign(name="History")
+history_max_year = int(comp_hist["year"].max())
+comp_forecast = components.loc[components["year"] > history_max_year]
+comp_all = pd.concat([comp_hist, comp_forecast], ignore_index=True)
+
+# Average annual values by period for the combined region, split at history_max_year like the plot above.
+# The 2020s decade is split into a History-only period and a forecast-only period so neither column
+# blends partial-decade data across the history/forecast boundary.
+periods = [
+    ("1990s", 1990, 1999),
+    ("2000s", 2001, 2009),
+    ("2010s", 2010, 2019),
+    (f"2020-{history_max_year}", 2020, history_max_year),
+    (f"{history_max_year + 1}-2039", history_max_year + 1, 2039),
+    ("2040-2060", 2040, 2060),
+]
+
+
+def period_avg_table(component):
+    subset = comp_all.loc[(comp_all["region"] == "Region") & (comp_all["component"] == component)]
+    avgs = [
+        subset.loc[(subset["year"] >= start) & (subset["year"] <= end)]
+        .groupby("name")["value"]
+        .mean()
+        .rename(label)
+        for label, start, end in periods
+    ]
+    return pd.concat(avgs, axis=1).T[["History"] + scenario_names]
+
+
+migration_avg_table = period_avg_table("Migration")
+natural_increase_avg_table = period_avg_table("Natural Increase")
+
+# Chart shows a trailing 3-year rolling average per series; period tables above use the unsmoothed annual values.
+comp_chart = comp_all.sort_values(["region", "component", "name", "year"]).copy()
+comp_chart["value"] = comp_chart.groupby(["region", "component", "name"])["value"].transform(
+    lambda s: s.rolling(3, min_periods=1).mean()
+)
+
+ojs_define(data=comp_chart, base_year=history_max_year)
+```
+
+# Dashboard
+
+## {.sidebar width="280px"}
+
+```{ojs}
+viewof yearFrom = Inputs.range([minYear, maxYear], {label: "Start Year", step: 5, value: minYear})
+```
+
+```{ojs}
+viewof yearTo = Inputs.range([minYear, maxYear], {label: "End Year", step: 5, value: maxYear})
+```
+
+```{ojs}
+viewof selectedScenario = Inputs.radio(scenarioNames, {label: "Scenario", value: scenarioNames.includes("REMI Medium") ? "REMI Medium" : scenarioNames[0]})
+```
+
+```{ojs}
+viewof selectedRegion = Inputs.select(regionNames, {label: "Region", value: "Region"})
+```
+
+<!-- Hidden helper definitions (no cards). -->
+
+```{ojs}
+//| output: false
+allData = transpose(data)
+```
+
+```{ojs}
+//| output: false
+minYear = Math.floor(d3.min(allData, d => d.year) / 5) * 5
+```
+
+```{ojs}
+//| output: false
+maxYear = Math.ceil(d3.max(allData, d => d.year) / 5) * 5
+```
+
+```{ojs}
+//| output: false
+// History always shown; the scenario selector toggles which single forecast bar is shown.
+scenarioNames = Array.from(new Set(allData.map(d => d.name))).filter(n => n !== "History").sort()
+```
+
+```{ojs}
+//| output: false
+// "Region" (sum of counties) plus each individual county, computed in Python.
+regionNames = ["Region", ...Array.from(new Set(allData.map(d => d.region))).filter(n => n !== "Region").sort()]
+```
+
+```{ojs}
+//| output: false
+filtered = allData.filter(d =>
+  d.region === selectedRegion &&
+  (d.name === "History" || d.name === selectedScenario) &&
+  d.year >= yearFrom &&
+  d.year <= yearTo
+)
+```
+
+```{ojs}
+//| output: false
+// x is a band scale (one entry per year), so a numeric `ticks` count doesn't thin labels; build an explicit array instead.
+xTickStep = (yearTo - yearFrom) > 40 ? 10 : (yearTo - yearFrom) > 15 ? 5 : 1
+```
+
+```{ojs}
+//| output: false
+xTicks = d3.range(Math.ceil(yearFrom / xTickStep) * xTickStep, yearTo + 1, xTickStep)
+```
+
+## Column
+
+```{ojs}
+//| title: Migration and natural increase - OFM history and REMI forecast scenarios
+Plot.plot({
+  marginLeft: 60,
+  marginRight: 20,
+  x: {label: "Year", tickFormat: "d", ticks: xTicks},
+  y: {label: "People", grid: true, nice: true},
+  color: {legend: true, domain: ["Migration", "Natural Increase"]},
+  marks: [
+    Plot.ruleY([0], {stroke: "#ddd"}),
+    Plot.barY(filtered, {x: "year", y: "value", fill: "component"}),
+    Plot.ruleX([base_year], {stroke: "#999", strokeDasharray: "4,3"}),
+    Plot.tip(
+      filtered,
+      Plot.pointer({x: "year", y: "value", fill: "component"})
+    )
+  ]
+})
+```
+
+## Row {height="30%"}
+
+```{python}
+#| title: Average annual migration by period (Region total)
+migration_avg_table.style.format("{:,.0f}", na_rep="")
+```
+
+```{python}
+#| title: Average annual natural increase by period (Region total)
+natural_increase_avg_table.style.format("{:,.0f}", na_rep="")
+```
+
+# Notes
+
+- **History**: OFM postcensal estimates of natural change and net migration, identical across all scenarios through `{python} history_max_year`.
+- **Migration**: net migrants (in-migration minus out-migration).
+- **Natural Increase**: births minus deaths.
+- **Region**: sum of King, Kitsap, Pierce, and Snohomish counties; individual counties can also be selected from the sidebar.
+- Scenario forecasts:
+  - **REMI Medium**: Default REMI forecast released August 2026
+  - **REMI Low**: Uses the "Census Low" international migration scenario
+  - **REMI High**: Uses the "Census High" international migration scenario
+  - **Zero_Intl_Mig**: Assumes zero international migration
+
+# Links
+
+## Row
+
+::: {.card title="OFM Population History"}
+Historical OFM population estimates by county, 1960-present.
+
+[Open dashboard →](ofm_population_dashboard.html)
+:::
+
+::: {.card title="Migration & Natural Growth"}
+REMI migration and natural increase history and scenario forecasts, by county.
+
+[Open dashboard →](components_dashboard.html)
+:::
+
+::: {.card title="CES Employment"}
+CES employment history by sector, national and regional.
+
+[Open dashboard →](ces_employment_dashboard.html)
+:::
+
+::: {.card title="REMI Story"}
+Narrative summary of the REMI population forecast.
+
+[Read the story →](remi_story.html)
+:::
