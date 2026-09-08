@@ -26,7 +26,10 @@ import re
 import pandas as pd
 import yaml
 
+import psrcelmerpy
+
 cfg = yaml.safe_load(open("configs/settings.yaml"))
+e_conn = psrcelmerpy.ElmerConn()
 ```
 
 ```{python}
@@ -210,41 +213,183 @@ remi_population = pd.concat([remi_population, remi_population_region_totals], ig
 ```{python}
 #| output: false
 EMPLOYMENT_PREFIX = "Employment - "
+remi_dir = cfg["remi_dir"]
+```
+
+```{python}
+#| output: false
+QCEW_NAICS_GROUPS = {
+    "naics_3133": ["naics_31", "naics_32", "naics_33"],
+    "naics_4445": ["naics_44", "naics_45"],
+    "naics_4849": ["naics_48", "naics_49"],
+}
 
 
-def load_remi_employment(file_path):
-    """Read a REMI workbook's industry-level Employment rows (excludes the
-    separate Employment by Occupation breakdown) and sum them by county (in
-    thousands) into a long [region, year, value] frame."""
+def load_qcew(qcew_year):
+    """Read covered employment by 2-digit NAICS per county for a year, combining
+    NAICS groups 31-33, 44-45 and 48-49 and folding "Education" into "Government"
+    (this source tracks public school district staff separately) to match REMI's
+    employment categories, into a long [region, naics, year, value] frame matching
+    remi_employment_naics."""
+    df = e_conn.get_table(schema='employment_summaries', table_name='covered_employment_by_city_by_naics2')
+    df = df.loc[(df['data_year'] == qcew_year) & (df['City'] == 'Total') & (df['County'] != 'Region')].copy()
+    df = df.drop(columns=['data_year', 'City'])
+    supressed_cols = [col for col in df.columns if 'suppressed' in col]
+    df = df.drop(columns=supressed_cols)
+    df["Government"] = df["Government"] + df["Education"]
+    df = df.drop(columns="Education")
+
+    before_total = df.drop(columns=['County', 'Total']).sum(axis=1)
+    for combined_col, source_cols in QCEW_NAICS_GROUPS.items():
+        df[combined_col] = df[source_cols].sum(axis=1)
+    df = df.drop(columns=[col for cols in QCEW_NAICS_GROUPS.values() for col in cols])
+
+    # Confirm combining the NAICS groups didn't change the overall total, i.e. no industry was missed.
+    after_total = df.drop(columns=['County', 'Total']).sum(axis=1)
+    assert (before_total - after_total).abs().max() < 1, "Combining NAICS groups should not change the total"
+
+    df["region"] = df["County"].map(bare_county_map)
+    naics_cols = [col for col in df.columns if col.startswith("naics_") or col == "Government"]
+    long = df.melt(id_vars="region", value_vars=naics_cols, var_name="naics", value_name="value")
+    long["year"] = qcew_year
+    return long[["region", "naics", "year", "value"]]
+
+
+qcew_year = 2025
+qcew_df = load_qcew(qcew_year)
+
+# "Region" is the sum of the four counties, computed here rather than relying on a workbook total row.
+qcew_region_totals = qcew_df.groupby(["naics", "year"], as_index=False)["value"].sum()
+qcew_region_totals["region"] = "Region"
+qcew_df = pd.concat([qcew_df, qcew_region_totals], ignore_index=True)
+```
+
+```{python}
+#| output: false
+REMI_INDUSTRY_LABELS = {
+    "Forestry, fishing, and hunting": "naics_11",
+    "Mining": "naics_21",
+    "Utilities": "naics_22",
+    "Construction": "naics_23",
+    "Manufacturing": "naics_3133",
+    "Wholesale trade": "naics_42",
+    "Retail trade": "naics_4445",
+    "Transportation and warehousing": "naics_4849",
+    "Information": "naics_51",
+    "Finance and insurance": "naics_52",
+    "Real estate and rental and leasing": "naics_53",
+    "Professional, scientific, and technical services": "naics_54",
+    "Management of companies and enterprises": "naics_55",
+    "Administrative, support, waste management, and remediation services": "naics_56",
+    "Educational services; private": "naics_61",
+    "Health care and social assistance": "naics_62",
+    "Arts, entertainment, and recreation": "naics_71",
+    "Accommodation and food services": "naics_72",
+    "Other services (except public administration)": "naics_81",
+    "State and Local Government": "Government",
+    "Federal Civilian": "Government",
+    "Federal Military": "Military",
+    # "Farm" is intentionally left unmapped so it gets dropped below.
+}
+
+
+def load_remi_employment_naics(file_path):
+    """Read a REMI workbook's Employment-by-industry rows by county (in
+    thousands) into a long [region, naics, year, value] frame; Federal Civilian
+    and State and Local Government are combined into "Government" (QCEW's own
+    Government count is likewise ESD covered employment combined with a survey
+    of federal employment), Farm is dropped, and grouped NAICS codes (31-33,
+    44-45, 48-49) keep REMI's combined value under a combined column name."""
     df = pd.read_excel(file_path, sheet_name="All", header=5)
     df = df.rename(columns={df.columns[0]: "region", df.columns[1]: "category"})
     year_cols = list(df.columns[3:])
 
-    emp = df[df["region"].isin(county_map) & df["category"].str.startswith(EMPLOYMENT_PREFIX)].copy()
-    long = emp.melt(id_vars="region", value_vars=year_cols, var_name="year", value_name="value")
+    industry_label = df["category"].str.extract(r"^Employment - (.+)$", expand=False)
+    emp = df.loc[df["region"].isin(county_map) & industry_label.notna()].copy()
+    emp["naics"] = industry_label.loc[emp.index].map(REMI_INDUSTRY_LABELS)
+    emp = emp.loc[emp["naics"].notna()].copy()
+
+    long = emp.melt(id_vars=["region", "naics"], value_vars=year_cols, var_name="year", value_name="value")
     long["year"] = long["year"].astype(int)
     long["value"] = long["value"].astype(float) * 1000
-    return long.groupby(["region", "year"], as_index=False)["value"].sum()
+    # Government combines two source rows per county/year, so re-aggregate after mapping.
+    return long.groupby(["region", "naics", "year"], as_index=False)["value"].sum()
 
 
-remi_dir = cfg["remi_dir"]
-
-remi_employment_frames = []
+remi_employment_naics_frames = []
 for forecast in cfg["remi_forecasts"]:
-    file_path = os.path.join(remi_dir, forecast["filename"])
-    df = load_remi_employment(file_path)
-    df["name"] = forecast["name"]
-    remi_employment_frames.append(df)
-remi_employment = pd.concat(remi_employment_frames, ignore_index=True)
+    emp_file_path = os.path.join(remi_dir, forecast["filename"])
+    emp_df = load_remi_employment_naics(emp_file_path)
+    emp_df["name"] = forecast["name"]
+    remi_employment_naics_frames.append(emp_df)
+remi_employment_naics = pd.concat(remi_employment_naics_frames, ignore_index=True)
 
 # "Region" is the sum of the four counties, computed here rather than relying on a workbook total row.
-remi_employment_region_totals = remi_employment.groupby(["name", "year"], as_index=False)["value"].sum()
-remi_employment_region_totals["region"] = "Region"
-remi_employment = pd.concat([remi_employment, remi_employment_region_totals], ignore_index=True)
+remi_employment_naics_region_totals = remi_employment_naics.groupby(["name", "naics", "year"], as_index=False)["value"].sum()
+remi_employment_naics_region_totals["region"] = "Region"
+remi_employment_naics = pd.concat([remi_employment_naics, remi_employment_naics_region_totals], ignore_index=True)
 
-# Year-over-year change per region, needed for the average annual employment growth table below.
-remi_employment = remi_employment.sort_values(["region", "year"])
-remi_employment["growth"] = remi_employment.groupby("region")["value"].diff()
+# Military has no QCEW-covered counterpart, so set it aside to rejoin as REMI's actual values.
+military_naics = remi_employment_naics.loc[remi_employment_naics["naics"] == "Military"].copy()
+remi_employment_naics = remi_employment_naics.loc[remi_employment_naics["naics"] != "Military"].copy()
+```
+
+```{python}
+#| output: false
+# REMI's employment figure includes proprietors, which QCEW's covered employment excludes and
+# REMI doesn't report separately, so the gap is captured empirically as a ratio at the one year
+# both sources cover, then held constant and applied to REMI's forecast.
+remi_anchor = remi_employment_naics.loc[
+    (remi_employment_naics["name"] == "REMI") & (remi_employment_naics["year"] == qcew_year), ["region", "naics", "value"]
+].rename(columns={"value": "remi_value"})
+qcew_anchor = qcew_df[["region", "naics", "value"]].rename(columns={"value": "qcew_value"})
+
+qcew_ratio = pd.merge(qcew_anchor, remi_anchor, on=["region", "naics"], how="inner")
+assert len(qcew_ratio) == len(qcew_anchor) == len(remi_anchor), "Every QCEW/REMI region-industry combo should have a match"
+qcew_ratio["ratio"] = qcew_ratio["qcew_value"] / qcew_ratio["remi_value"]
+
+qcew_forecast = pd.merge(
+    remi_employment_naics.loc[remi_employment_naics["name"] == "REMI", ["region", "naics", "year", "value"]],
+    qcew_ratio[["region", "naics", "ratio"]],
+    on=["region", "naics"],
+    how="inner",
+)
+qcew_forecast["value"] = qcew_forecast["value"] * qcew_forecast["ratio"]
+qcew_forecast = qcew_forecast.drop(columns="ratio")
+
+# At the anchor year the scaled forecast should reproduce QCEW's actual value exactly, by construction.
+_anchor_check = pd.merge(
+    qcew_forecast.loc[qcew_forecast["year"] == qcew_year], qcew_df, on=["region", "naics", "year"], suffixes=("_scaled", "_actual")
+)
+assert (_anchor_check["value_scaled"] - _anchor_check["value_actual"]).abs().max() < 1e-6
+
+# Military passes through as REMI's own value, since QCEW has no counterpart to scale against.
+military_actual = military_naics.loc[military_naics["name"] == "REMI", ["region", "naics", "year", "value"]]
+
+# QCEW is the actual, observed value at the anchor year; REMI (scaled to QCEW terms) supplies every
+# other year. Military has no QCEW counterpart at all, so REMI's value passes through for every year,
+# including the anchor year.
+qcew_employment_all = pd.concat(
+    [
+        qcew_df.assign(source="QCEW"),
+        qcew_forecast.loc[qcew_forecast["year"] != qcew_year].assign(source="REMI (QCEW terms)"),
+        military_actual.assign(source="REMI (actual)"),
+    ],
+    ignore_index=True,
+).sort_values(["region", "naics", "year"])
+
+pd.concat([qcew_forecast, military_actual], ignore_index=True).sort_values(["region", "naics", "year"]).to_csv(
+    os.path.join(output_dir, "REMI_on_QCEW_forecast.csv")
+)
+```
+
+```{python}
+#| output: false
+# Regional total across all industries, in QCEW (covered-employment) terms; this replaces
+# remi_employment for the region-level chart, growth table and CAGR comparison below.
+qcew_employment_region_total = qcew_employment_all.groupby(["region", "year"], as_index=False)["value"].sum()
+qcew_employment_region_total = qcew_employment_region_total.sort_values(["region", "year"])
+qcew_employment_region_total["growth"] = qcew_employment_region_total.groupby("region")["value"].diff()
 ```
 
 ```{python}
@@ -443,17 +588,17 @@ fig.show()
 ## Regional Employment Forecast
 
 ```{python}
-remi_forecast_employment = remi_employment.loc[
-    (remi_employment["region"] == "Region") & (remi_employment["year"] >= cfg['remi_base_year'])
+qcew_forecast_employment = qcew_employment_region_total.loc[
+    (qcew_employment_region_total["region"] == "Region") & (qcew_employment_region_total["year"] >= qcew_year)
 ].sort_values("year")
-remi_forecast_employment["value"] = (remi_forecast_employment["value"] / 1_000_000).round(2)
+qcew_forecast_employment["value"] = (qcew_forecast_employment["value"] / 1_000_000).round(2)
 
-fig = px.bar(remi_forecast_employment, x="year", y="value", title="REMI Employment Forecast")
+fig = px.bar(qcew_forecast_employment, x="year", y="value", title="REMI-on-QCEW Employment Forecast")
 fig.update_layout(xaxis_title="Year", yaxis_title="Total Employment (Millions)")
 fig.update_traces(marker_color="#00cc96", hovertemplate="Year=%{x}<br>Total Employment=%{y:.2f}M<extra></extra>")
 
 # Callouts for the first and last forecast years.
-for _, row in remi_forecast_employment.iloc[[0, -1]].iterrows():
+for _, row in qcew_forecast_employment.iloc[[0, -1]].iterrows():
     fig.add_annotation(
         x=row["year"],
         y=row["value"],
@@ -467,8 +612,8 @@ fig.show()
 
 ## Regional Employment Forecast — Takeaways
 
-- Regional employment grows from **2.93M** jobs in 2024 to **4.04M** by 2060 — an increase of roughly **1.11M** jobs.
-- That's about **0.89%** average annual growth, a moderate but sustained pace over the full forecast.
+- Regional employment grows from **`{python} f"{qcew_forecast_employment['value'].iloc[0]:.2f}M"`** jobs in `{python} qcew_forecast_employment['year'].iloc[0]` to **`{python} f"{qcew_forecast_employment['value'].iloc[-1]:.2f}M"`** by `{python} qcew_forecast_employment['year'].iloc[-1]` — an increase of roughly **`{python} f"{qcew_forecast_employment['value'].iloc[-1] - qcew_forecast_employment['value'].iloc[0]:.2f}M"`** jobs.
+- That's about **`{python} f"{cagr(qcew_employment_region_total, 'Region', qcew_year, 2060):.2%}"`** average annual growth, a moderate but sustained pace over the full forecast.
 - Growth continues, but at a slower rate than the boom years of the 2010s (see the job growth comparison next).
 
 ## Population Growth by Period {.smaller}
@@ -559,7 +704,7 @@ def job_growth_period_avg(df, start, end):
     return subset["growth"].mean()
 
 job_growth_avg_table = pd.Series(
-    {label: job_growth_period_avg(remi_employment, start, end) for label, start, end in job_periods},
+    {label: job_growth_period_avg(qcew_employment_region_total, start, end) for label, start, end in job_periods},
     name="Avg. Annual Employment Growth",
 ).round(0).astype(int).to_frame()
 job_growth_avg_table = job_growth_avg_table.rename_axis(index="Period", columns=None)
@@ -568,16 +713,16 @@ job_growth_avg_table.style.format({"Avg. Annual Employment Growth": "{:,.0f}"})
 
 ## Employment Growth by Period — Takeaways
 
-- Job growth surged in the 2010s (**51,904**/year).
-- Growth dipped to **21,585**/year in 2020-2024, reflecting the pandemic-era disruption.
-- The REMI forecast averages **30,784**/year — a moderate, sustained pace below the 2010s boom but well above 2000s levels.
+- Job growth surged in the 2010s (**`{python} f"{job_growth_avg_table.loc['2010s', 'Avg. Annual Employment Growth']:,.0f}"`**/year).
+- Growth dipped to **`{python} f"{job_growth_avg_table.loc['2020-2024', 'Avg. Annual Employment Growth']:,.0f}"`**/year in 2020-2024, reflecting the pandemic-era disruption.
+- The REMI forecast averages **`{python} f"{job_growth_avg_table.loc['REMI 2025-2060', 'Avg. Annual Employment Growth']:,.0f}"`**/year — a moderate, sustained pace below the 2010s boom but well above 2000s levels.
 
 ## Employment Growth vs. the Nation {.smaller}
 
 ```{python}
 cagr_table = pd.DataFrame(
     {
-        "PSRC Region": {label: cagr(remi_employment, "Region", start, end) for label, start, end in job_periods},
+        "PSRC Region": {label: cagr(qcew_employment_region_total, "Region", start, end) for label, start, end in job_periods},
         "Nation": {label: cagr(remi_national_employment, "Nation", start, end) for label, start, end in job_periods},
     }
 )
@@ -587,9 +732,9 @@ cagr_table.style.format("{:.2%}")
 
 ## Employment Growth vs. the Nation — Takeaways
 
-- The region outpaced the nation in 3 of 4 periods: **0.86%** vs. **0.60%** (2000s), **2.43%** vs. **1.72%** (2010s), and **0.87%** vs. **0.35%** (2025-2060 forecast).
-- The exception was 2020-2024, where the nation's post-pandemic snapback (**2.81%**) outpaced the region (**1.98%**).
-- Long-run, the region is forecast to grow jobs roughly **2.5x** faster than the nation.
+- The region outpaced the nation in 3 of 4 periods: **`{python} f"{cagr_table.loc['2000s', 'PSRC Region']:.2%}"`** vs. **`{python} f"{cagr_table.loc['2000s', 'Nation']:.2%}"`** (2000s), **`{python} f"{cagr_table.loc['2010s', 'PSRC Region']:.2%}"`** vs. **`{python} f"{cagr_table.loc['2010s', 'Nation']:.2%}"`** (2010s), and **`{python} f"{cagr_table.loc['REMI 2025-2060', 'PSRC Region']:.2%}"`** vs. **`{python} f"{cagr_table.loc['REMI 2025-2060', 'Nation']:.2%}"`** (2025-2060 forecast).
+- The exception was 2020-2024, where the nation's post-pandemic snapback (**`{python} f"{cagr_table.loc['2020-2024', 'Nation']:.2%}"`**) outpaced the region (**`{python} f"{cagr_table.loc['2020-2024', 'PSRC Region']:.2%}"`**).
+- Long-run, the region is forecast to grow jobs roughly **`{python} f"{cagr_table.loc['REMI 2025-2060', 'PSRC Region'] / cagr_table.loc['REMI 2025-2060', 'Nation']:.1f}x"`** faster than the nation.
 
 ## Information Sector vs. the Nation {.smaller}
 
@@ -600,9 +745,9 @@ information_cagr_table.style.format("{:.2%}")
 
 ## Information Sector vs. the Nation — Takeaways
 
-- The region's Information sector grew a strong **4.17%** annually in the 2010s tech boom, versus just **0.56%** nationally.
-- The nation's Information sector actually shrank in the 2000s (**-2.48%**) while the region still grew modestly (**1.10%**).
-- Forecast growth moderates to **0.79%**/year regionally — still roughly double the national **0.44%** pace.
+- The region's Information sector grew a strong **`{python} f"{information_cagr_table.loc['2010s', 'PSRC Region']:.2%}"`** annually in the 2010s tech boom, versus just **`{python} f"{information_cagr_table.loc['2010s', 'Nation']:.2%}"`** nationally.
+- The nation's Information sector actually shrank in the 2000s (**`{python} f"{information_cagr_table.loc['2000s', 'Nation']:.2%}"`**) while the region still grew modestly (**`{python} f"{information_cagr_table.loc['2000s', 'PSRC Region']:.2%}"`**).
+- Forecast growth moderates to **`{python} f"{information_cagr_table.loc['REMI 2025-2060', 'PSRC Region']:.2%}"`**/year regionally — still roughly **`{python} f"{information_cagr_table.loc['REMI 2025-2060', 'PSRC Region'] / information_cagr_table.loc['REMI 2025-2060', 'Nation']:.1f}x"`** the national **`{python} f"{information_cagr_table.loc['REMI 2025-2060', 'Nation']:.2%}"`** pace.
 
 ## Professional & Technical Services vs. the Nation {.smaller}
 
@@ -613,9 +758,9 @@ professional_scientific_cagr_table.style.format("{:.2%}")
 
 ## Professional & Technical Services vs. the Nation — Takeaways
 
-- Regional Professional, Scientific, and Technical services grew steadily across every period: **1.91%**, **2.68%**, **3.20%**, and **1.31%**.
+- Regional Professional, Scientific, and Technical services grew steadily across every period: **`{python} f"{professional_scientific_cagr_table.loc['2000s', 'PSRC Region']:.2%}"`**, **`{python} f"{professional_scientific_cagr_table.loc['2010s', 'PSRC Region']:.2%}"`**, **`{python} f"{professional_scientific_cagr_table.loc['2020-2024', 'PSRC Region']:.2%}"`**, and **`{python} f"{professional_scientific_cagr_table.loc['REMI 2025-2060', 'PSRC Region']:.2%}"`**.
 - The region matched or exceeded the national pace in all four periods.
-- Forecast 2025-2060 growth of **1.31%**/year is over **1.5x** the national **0.84%** pace — continued regional outperformance in this sector.
+- Forecast 2025-2060 growth of **`{python} f"{professional_scientific_cagr_table.loc['REMI 2025-2060', 'PSRC Region']:.2%}"`**/year is over **`{python} f"{professional_scientific_cagr_table.loc['REMI 2025-2060', 'PSRC Region'] / professional_scientific_cagr_table.loc['REMI 2025-2060', 'Nation']:.1f}x"`** the national **`{python} f"{professional_scientific_cagr_table.loc['REMI 2025-2060', 'Nation']:.2%}"`** pace — continued regional outperformance in this sector.
 
 ## Comparing Population Forecasts {.smaller}
 
@@ -650,6 +795,30 @@ forecast_comparison_table.style.format({"Avg. Annual Population Growth": "{:,.0f
 
 - The 3 more recent forecasts broadly agree, ranging from **40,165** to **46,009** additional residents per year.
 - The REMI forecast projects **46,009**/year — the highest of the recent forecasts.
+
+## Data Export {visibility="hidden"}
+
+```{python}
+#| output: false
+# Every chart's plotted data and every table's data, one sheet each, for downstream reuse outside the slide deck.
+chart_exports = {
+    "Regional Population Forecast": remi_forecast_population,
+    "Regional Employment Forecast": qcew_forecast_employment,
+}
+table_exports = {
+    "Population Growth by Period": growth_avg_table,
+    "Migration vs Natural Increase": decade_avg_table,
+    "Employment Growth by Period": job_growth_avg_table,
+    "Employment Growth vs Nation": cagr_table,
+    "Information Sector vs Nation": information_cagr_table,
+    "Prof Tech Services vs Nation": professional_scientific_cagr_table,
+    "Comparing Population Forecasts": forecast_comparison_table,
+}
+
+with pd.ExcelWriter(os.path.join(output_dir, "forecast_presentation_data.xlsx")) as writer:
+    for sheet_name, df in {**chart_exports, **table_exports}.items():
+        df.to_excel(writer, sheet_name=sheet_name[:31])
+```
 
 ## Summary
 
