@@ -10,6 +10,12 @@ state_id: 53
 
 ofm_components_file: ofm_april1_components_of_change_1960_to_present.xlsx
 
+ofm_age_sex_files:
+  - ofm_pop_age_sex_intercensal_1990_1999.xlsx
+  - ofm_pop_age_sex_intercensal_2000_2009.xlsx
+  - ofm_pop_age_sex_postcensal_2020_2025.xlsx
+sade_age_sex_file: "SADE_County_Population_by_Age_and_Sex,_2010-2019_20260909.csv"
+
 remi_base_year: 2024
 remi_components_dir: J:/Projects/Forecasts/_Regional/2026/REMI/Components
 remi_components_forecasts:
@@ -17,6 +23,13 @@ remi_components_forecasts:
     filename: REMI_v3.4_base_adj_to_OFM.xlsx
   # - name: REMI_national
   #   filename: REMI_v3.4_national.xlsx
+
+remi_emp_dir: J:/Projects/Forecasts/_Regional/2026/REMI/EmploymentByMajorSector
+remi_emp_forecast: REMI_v3.4_base_adj_to_OFM.xlsx
+
+psrc_emp_file: total_emp_counties_2025.csv
+psrc_emp_year: 2025
+major_sector_lookup_file: major_sector_lookup.csv
 
 remi_dir: J:/Projects/Forecasts/_Regional/2026/REMI
 remi_forecasts:
