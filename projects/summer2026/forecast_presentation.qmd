@@ -176,7 +176,35 @@ ofm_population = load_ofm_population(os.path.join(data_dir, cfg["ofm_components_
 ofm_population_region_totals = ofm_population.groupby("year", as_index=False)["value"].sum()
 ofm_population_region_totals["region"] = "Region"
 ofm_population = pd.concat([ofm_population, ofm_population_region_totals], ignore_index=True)
+```
 
+```{python}
+#| output: false
+def load_ofm_housing(file_path):
+    """Read the OFM Housing Units sheet's April 1 estimates by county into a
+    long [region, year, value] frame; sub-county jurisdiction rows (unincorporated,
+    incorporated, cities) share the same County value, so rows are matched on
+    the full "<County> County" Jurisdiction text instead, keeping only the
+    "Total Housing Units" columns (excluding the one-unit/two-or-more/mobile-home breakdowns)."""
+    df = pd.read_excel(file_path, sheet_name="Housing Units", skiprows=3)
+    df = df.loc[df["Jurisdiction"].isin(county_map)].rename(columns={"Jurisdiction": "region"})
+
+    year_cols = [c for c in df.columns if "Total Housing Units" in str(c)]
+    long = df.melt(id_vars="region", value_vars=year_cols, var_name="period", value_name="value")
+    long["year"] = long["period"].str.extract(r"(\d{4})").astype(int)
+    return long[["region", "year", "value"]]
+
+
+ofm_housing = load_ofm_housing(os.path.join(data_dir, cfg["ofm_housing_file"]))
+
+# "Region" is the sum of the four counties, computed here rather than relying on a workbook total row.
+ofm_housing_region_totals = ofm_housing.groupby("year", as_index=False)["value"].sum()
+ofm_housing_region_totals["region"] = "Region"
+ofm_housing = pd.concat([ofm_housing, ofm_housing_region_totals], ignore_index=True)
+```
+
+```{python}
+#| output: false
 POPULATION_LABELS = {"Total Population": "Population"}
 
 
@@ -770,6 +798,29 @@ growth_avg_table.style.format({
 - The REMI forecast projects **47,714**/year, just below the recent 2020-2026 pace of **48,978**/year.
 - No period shows a dramatic acceleration or slowdown — the long-run growth trend persists into the forecast.
 
+## Housing Unit Growth by Period {.smaller}
+
+```{python}
+# Historical only — there is no housing unit forecast to compare against REMI's population/employment forecasts.
+ofm_housing_region = ofm_housing.loc[ofm_housing["region"] == "Region"].sort_values("year").set_index("year")["value"]
+ofm_housing_growth = ofm_housing_region.diff()
+
+housing_growth_avg_table = pd.Series(
+    {label: growth_period_avg(ofm_housing_growth, start, end) for label, start, end in ofm_periods},
+    name="Avg. Annual Housing Unit Growth",
+).round(0).astype(int).to_frame()
+housing_growth_avg_table = housing_growth_avg_table.rename_axis(index="Period", columns=None)
+housing_growth_avg_table.style.format({
+    "Avg. Annual Housing Unit Growth": "{:,.0f}"
+})
+```
+
+## Housing Unit Growth by Period — Takeaways
+
+- Housing growth slowed sharply after the 1990s: from **44,730**/year down to roughly **19,500**/year through the 2000s and 2010s.
+- The 2020-2026 pace has picked back up to **27,288**/year, still well below the 1990s peak.
+- No REMI housing unit forecast exists, so this period comparison is historical only.
+
 ## Population Growth by Age Group {.smaller}
 
 ```{python}
@@ -945,6 +996,7 @@ chart_exports = {
 }
 table_exports = {
     "Population Growth by Period": growth_avg_table,
+    "Housing Unit Growth by Period": housing_growth_avg_table,
     "Population Growth by Age Group": age_growth_avg_table,
     "Migration vs Natural Increase": decade_avg_table,
     "Employment Growth by Period": job_growth_avg_table,

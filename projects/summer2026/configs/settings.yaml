@@ -9,6 +9,7 @@ county_map:
 state_id: 53
 
 ofm_components_file: ofm_april1_components_of_change_1960_to_present.xlsx
+ofm_housing_file: ofm_april1_postcensal_estimates_housing_1980_1990-present.xlsx
 
 ofm_age_sex_files:
   - ofm_pop_age_sex_intercensal_1990_1999.xlsx
